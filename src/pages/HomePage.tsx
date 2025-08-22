@@ -1,13 +1,15 @@
-import { Search, ChefHat } from "lucide-react";
+import { Search, ChefHat, CheckCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import BottomNavigation from "@/components/BottomNavigation";
 import RecipeCard from "@/components/RecipeCard";
 import pastaImage from "@/assets/pasta-vegetables.jpg";
 import breakfastImage from "@/assets/breakfast-bowl.jpg";
 
 const HomePage = () => {
+  const navigate = useNavigate();
+  
   const featuredRecipes = [
     {
       id: "1",
@@ -24,6 +26,12 @@ const HomePage = () => {
       category: "Breakfast"
     }
   ];
+
+  const handleWhatToCook = () => {
+    // Get a random recipe from available recipes
+    const randomRecipe = featuredRecipes[Math.floor(Math.random() * featuredRecipes.length)];
+    navigate(`/recipes/${randomRecipe.id}`);
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -48,6 +56,14 @@ const HomePage = () => {
 
       <main className="px-4 py-6">
         <section className="mb-8">
+          <Button 
+            onClick={handleWhatToCook}
+            className="w-full mb-6 bg-primary hover:bg-primary/90 text-primary-foreground py-4 text-lg font-medium gap-2"
+          >
+            <CheckCircle className="w-6 h-6" />
+            WTC Button
+          </Button>
+          
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-foreground">Popular Recipes</h2>
             <Link to="/recipes">
