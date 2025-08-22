@@ -52,6 +52,14 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				recipe: {
+					green: 'hsl(var(--recipe-green))',
+					'green-light': 'hsl(var(--recipe-green-light))',
+					gray: 'hsl(var(--recipe-gray))',
+					text: 'hsl(var(--recipe-text))',
+					'text-muted': 'hsl(var(--recipe-text-muted))',
+					yellow: 'hsl(var(--recipe-yellow))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -89,6 +97,10 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out'
+			},
+			boxShadow: {
+				'card': 'var(--shadow-card)',
+				'card-hover': 'var(--shadow-card-hover)'
 			}
 		}
 	},

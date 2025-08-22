@@ -1,0 +1,62 @@
+import { ArrowLeft, Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import BottomNavigation from "@/components/BottomNavigation";
+import RecipeCard from "@/components/RecipeCard";
+import { Link } from "react-router-dom";
+import pastaImage from "@/assets/pasta-vegetables.jpg";
+
+const FavoritesPage = () => {
+  const favoriteRecipes = [
+    {
+      id: "1",
+      title: "Pasta with Vegetables",
+      image: pastaImage,
+      rating: 5,
+      category: "Dinner"
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-background pb-20">
+      <header className="bg-card shadow-card border-b border-border">
+        <div className="px-4 py-4">
+          <div className="flex items-center gap-3">
+            <Link to="/">
+              <Button variant="ghost" size="sm" className="p-2">
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            </Link>
+            <h1 className="text-xl font-semibold text-foreground">Favorites</h1>
+          </div>
+        </div>
+      </header>
+
+      <main className="px-4 py-6">
+        {favoriteRecipes.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {favoriteRecipes.map((recipe) => (
+              <RecipeCard key={recipe.id} {...recipe} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <Heart className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-foreground mb-2">No favorites yet</h2>
+            <p className="text-muted-foreground mb-6">
+              Start adding recipes to your favorites to see them here
+            </p>
+            <Link to="/recipes">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                Browse Recipes
+              </Button>
+            </Link>
+          </div>
+        )}
+      </main>
+
+      <BottomNavigation />
+    </div>
+  );
+};
+
+export default FavoritesPage;
