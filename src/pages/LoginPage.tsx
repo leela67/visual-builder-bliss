@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import BottomNavigation from "@/components/BottomNavigation";
+import registration from "./RegistrationPage";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
