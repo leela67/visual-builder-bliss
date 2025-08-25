@@ -1,4 +1,6 @@
 import { useState } from "react";
+import InfoIconButton from "../components/ui/InfoIconButton";
+import LoginIconButton from "../components/ui/LoginIconButton";
 import { ArrowLeft, Upload, Youtube, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,7 +35,11 @@ const CreateRecipePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20" style={{ position: "relative" }}>
+      <div style={{ position: "absolute", top: 16, right: 16, display: "flex", flexDirection: "row", zIndex: 50 }}>
+        <InfoIconButton />
+        <LoginIconButton />
+      </div>
       <header className="bg-card shadow-card border-b border-border">
         <div className="px-4 py-4">
           <div className="flex items-center gap-3">

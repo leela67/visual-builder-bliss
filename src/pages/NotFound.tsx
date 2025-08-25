@@ -1,4 +1,6 @@
 import { useLocation } from "react-router-dom";
+import InfoIconButton from "../components/ui/InfoIconButton";
+import LoginIconButton from "../components/ui/LoginIconButton";
 import { useEffect } from "react";
 
 const NotFound = () => {
@@ -12,7 +14,11 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-screen flex items-center justify-center bg-background" style={{ position: "relative" }}>
+      <div style={{ position: "absolute", top: 16, right: 16, display: "flex", flexDirection: "row", zIndex: 50 }}>
+        <InfoIconButton />
+        <LoginIconButton />
+      </div>
       <div className="text-center">
         <h1 className="text-4xl font-bold mb-4 text-foreground">404</h1>
         <p className="text-xl text-muted-foreground mb-4">Oops! Page not found</p>

@@ -1,4 +1,6 @@
 import { Search, ChefHat, CheckCircle } from "lucide-react";
+import InfoIconButton from "../components/ui/InfoIconButton";
+import LoginIconButton from "../components/ui/LoginIconButton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -34,7 +36,11 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20" style={{ position: "relative" }}>
+      <div style={{ position: "absolute", top: 16, right: 16, display: "flex", flexDirection: "row", zIndex: 50 }}>
+        <InfoIconButton />
+        <LoginIconButton />
+      </div>
       <header className="bg-card shadow-card border-b border-border">
         <div className="px-4 py-6">
           <div className="flex items-center gap-3 mb-4">
@@ -58,10 +64,12 @@ const HomePage = () => {
         <section className="mb-8">
           <Button 
             onClick={handleWhatToCook}
-            className="w-full mb-6 bg-primary hover:bg-primary/90 text-primary-foreground py-4 text-lg font-medium gap-2"
+            className="w-full mb-6 bg-primary hover:bg-primary/90 text-primary-foreground py-4 text-lg font-medium gap-2 animate-glow"
+// Add glowing animation to global styles
+// You can move this to index.css if you prefer
           >
             <CheckCircle className="w-6 h-6" />
-            WTC Button
+            WTC
           </Button>
           
           <div className="flex items-center justify-between mb-4">

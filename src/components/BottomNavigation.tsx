@@ -1,4 +1,5 @@
 import { Home, BookOpen, ShoppingBag, Heart } from "lucide-react";
+import { User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const BottomNavigation = () => {
@@ -15,6 +16,7 @@ const BottomNavigation = () => {
     { icon: BookOpen, label: "Recipes", path: "/recipes" },
     { icon: ShoppingBag, label: "Products", path: "/products" },
     { icon: Heart, label: "Favorites", path: "/favorites" },
+  { icon: User, label: "Profile", path: "/profile" },
   ];
 
   return (

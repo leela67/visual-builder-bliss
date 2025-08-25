@@ -4,6 +4,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/LoginPage";
+import ProfilePage from "./pages/ProfilePage";
+import InfoPage from "./pages/InfoPage";
 import RecipesPage from "./pages/RecipesPage";
 import RecipeDetailPage from "./pages/RecipeDetailPage";
 import CreateRecipePage from "./pages/CreateRecipePage";
@@ -26,6 +29,9 @@ const App = () => (
           <Route path="/create-recipe" element={<CreateRecipePage />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/info" element={<InfoPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
