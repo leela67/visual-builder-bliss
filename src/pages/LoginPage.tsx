@@ -56,7 +56,10 @@ export default function LoginPage() {
             </button>
           </form>
           <div className="mt-6 text-center text-sm">
-            New user? <a href="#" className="text-[#2D5033] font-medium hover:underline">Register</a>
+            New user?{" "}
+            <Link to="/register" className="text-primary font-medium hover:underline">
+              Register
+            </Link>
           </div>
         </div>
       </main>
