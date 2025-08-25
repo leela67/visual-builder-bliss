@@ -4,7 +4,6 @@ import LoginIconButton from "../components/ui/LoginIconButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import StarRating from "@/components/StarRating";
 import BottomNavigation from "@/components/BottomNavigation";
 import { Link, useParams } from "react-router-dom";
@@ -105,31 +104,21 @@ const RecipeDetailPage = () => {
 
         {recipe.videoUrl && (
           <div className="mb-6">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  className="w-full gap-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                >
-                  <Youtube className="w-4 h-4" />
-                  Watch Video Tutorial
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl w-full">
-                <DialogHeader>
-                  <DialogTitle>Video Tutorial - {recipe.title}</DialogTitle>
-                </DialogHeader>
-                <div className="aspect-video w-full">
-                  <iframe
-                    src={getEmbedUrl(recipe.videoUrl)}
-                    title="Recipe Video Tutorial"
-                    className="w-full h-full rounded-lg"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-              </DialogContent>
-            </Dialog>
+            <div className="bg-card rounded-lg p-4 shadow-card">
+              <h3 className="font-semibold text-card-foreground mb-3 flex items-center gap-2">
+                <Youtube className="w-5 h-5 text-primary" />
+                Video Tutorial
+              </h3>
+              <div className="aspect-video w-full">
+                <iframe
+                  src={getEmbedUrl(recipe.videoUrl)}
+                  title="Recipe Video Tutorial"
+                  className="w-full h-full rounded-lg"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </div>
           </div>
         )}
 
