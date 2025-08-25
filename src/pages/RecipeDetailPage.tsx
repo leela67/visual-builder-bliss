@@ -4,13 +4,21 @@ import LoginIconButton from "../components/ui/LoginIconButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import StarRating from "@/components/StarRating";
 import BottomNavigation from "@/components/BottomNavigation";
 import { Link, useParams } from "react-router-dom";
+import { useState } from "react";
 import pastaImage from "@/assets/pasta-vegetables.jpg";
 
 const RecipeDetailPage = () => {
   const { id } = useParams();
+  
+  // Helper function to convert YouTube URL to embed URL
+  const getEmbedUrl = (url: string) => {
+    const videoId = url.split('v=')[1]?.split('&')[0] || 'dQw4w9WgXcQ'; // fallback to Rick Roll
+    return `https://www.youtube.com/embed/${videoId}`;
+  };
   
   // Mock data - in a real app, you'd fetch based on id
   const recipe = {
@@ -40,7 +48,7 @@ const RecipeDetailPage = () => {
       "Toss everything together and season with salt and pepper.",
       "Garnish with fresh herbs and serve hot."
     ],
-    videoUrl: "https://youtube.com/watch?v=example"
+    videoUrl: "https://youtube.com/watch?v=dQw4w9WgXcQ"
   };
 
   return (
@@ -97,13 +105,31 @@ const RecipeDetailPage = () => {
 
         {recipe.videoUrl && (
           <div className="mb-6">
-            <Button 
-              variant="outline" 
-              className="w-full gap-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-            >
-              <Youtube className="w-4 h-4" />
-              Watch Video Tutorial
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="w-full gap-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                >
+                  <Youtube className="w-4 h-4" />
+                  Watch Video Tutorial
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl w-full">
+                <DialogHeader>
+                  <DialogTitle>Video Tutorial - {recipe.title}</DialogTitle>
+                </DialogHeader>
+                <div className="aspect-video w-full">
+                  <iframe
+                    src={getEmbedUrl(recipe.videoUrl)}
+                    title="Recipe Video Tutorial"
+                    className="w-full h-full rounded-lg"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         )}
 
