@@ -1,4 +1,4 @@
-import { ArrowLeft, Clock, Users, Youtube } from "lucide-react";
+import { ArrowLeft, Clock, Users, Youtube, Share2 } from "lucide-react";
 import InfoIconButton from "../components/ui/InfoIconButton";
 import LoginIconButton from "../components/ui/LoginIconButton";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,19 @@ const RecipeDetailPage = () => {
     videoUrl: "https://youtube.com/watch?v=dQw4w9WgXcQ"
   };
 
+  const handleShare = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      await navigator.share({
+        title: document.title,
+        url,
+      });
+    } else {
+      await navigator.clipboard.writeText(url);
+      alert("Link copied to clipboard!");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20" style={{ position: "relative" }}>
       <div style={{ position: "absolute", top: 16, right: 16, display: "flex", flexDirection: "row", zIndex: 50 }}>
@@ -88,6 +101,18 @@ const RecipeDetailPage = () => {
             <div className="flex items-center gap-1">
               <Users className="w-4 h-4" />
               {recipe.servings} servings
+              <button
+                onClick={handleShare}
+                className="ml-2 p-1 rounded hover:bg-accent transition flex items-center gap-1"
+                title="Share recipe"
+                type="button"
+              >
+                {/* Custom share icon SVG */}
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18 8a3 3 0 0 0-2.83 2H8.83A3 3 0 1 0 6 15a2.98 2.98 0 0 0 2.83-2h6.34A3 3 0 1 0 18 8zm0 2a1 1 0 1 1-1 1c0-.55.45-1 1-1zm-12 5a1 1 0 1 1 1-1c0 .55-.45 1-1 1zm12 0a1 1 0 1 1 1-1c0 .55-.45 1-1 1z"/>
+                </svg>
+                <span className="text-sm">Share</span>
+              </button>
             </div>
           </div>
         </div>
