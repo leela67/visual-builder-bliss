@@ -27,6 +27,13 @@ const HomePage = () => {
       image: breakfastImage,
       rating: 4,
       category: "Breakfast"
+    },
+    {
+      id: "3",
+      title: "Mediterranean Salad",
+      image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop",
+      rating: 4,
+      category: "Lunch"
     }
   ];
 
@@ -132,7 +139,7 @@ const HomePage = () => {
             </Link>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {featuredRecipes.map((recipe) => (
               <RecipeCard key={recipe.id} {...recipe} />
             ))}
