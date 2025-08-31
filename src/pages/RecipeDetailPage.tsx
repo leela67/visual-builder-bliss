@@ -107,10 +107,7 @@ const RecipeDetailPage = () => {
                 title="Share recipe"
                 type="button"
               >
-                {/* Custom share icon SVG */}
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M18 8a3 3 0 0 0-2.83 2H8.83A3 3 0 1 0 6 15a2.98 2.98 0 0 0 2.83-2h6.34A3 3 0 1 0 18 8zm0 2a1 1 0 1 1-1 1c0-.55.45-1 1-1zm-12 5a1 1 0 1 1 1-1c0 .55-.45 1-1 1zm12 0a1 1 0 1 1 1-1c0 .55-.45 1-1 1z"/>
-                </svg>
+            <Share2 className="w-6 h-6" />
                 <span className="text-sm">Share</span>
               </button>
             </div>
