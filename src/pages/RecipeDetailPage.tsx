@@ -182,15 +182,21 @@ const RecipeDetailPage = () => {
             <Badge variant="secondary">{recipe.category}</Badge>
           </div>
           
-          <div className="flex items-center justify-between mt-2">
-            <StarRating rating={recipe.rating} showNumber />
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <Clock className="w-4 h-4" />
-              {recipe.cookTime}
+          <div className="flex items-center mt-2">
+            <div className="flex items-center gap-4">
+              <StarRating rating={recipe.rating} showNumber />
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <Eye className="w-4 h-4" />
+                {id && getViewCount(id)} views
+              </div>
             </div>
           </div>
           
           <div className="flex items-center gap-6 mt-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Clock className="w-4 h-4" />
+              {recipe.cookTime}
+            </div>
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4" />
               <div className="flex items-center gap-2">
@@ -214,10 +220,6 @@ const RecipeDetailPage = () => {
                   <Plus className="w-3 h-3" />
                 </Button>
               </div>
-            </div>
-            <div className="flex items-center gap-1">
-              <Eye className="w-4 h-4" />
-              {id && getViewCount(id)} views
             </div>
             <button
               onClick={handleShare}
