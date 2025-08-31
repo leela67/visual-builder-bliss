@@ -14,7 +14,7 @@ import breakfastImage from "@/assets/breakfast-bowl.jpg";
 const RecipesPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   
-  const categories = ["All", "Breakfast", "Lunch", "Dinner", "Dessert", "Snacks"];
+  const categories = ["All", "Breakfast", "Lunch", "Dinner", "Dessert", "Snacks", "Fresh Pickles", "Juices"];
   
   const recipes = [
     {
@@ -22,14 +22,33 @@ const RecipesPage = () => {
       title: "Pasta with Vegetables",
       image: pastaImage,
       rating: 5,
-      category: "Dinner"
+      category: "Dinner",
+      servings: 4,
+      ingredients: [
+        { name: "pasta", quantity: 200, unit: "g" },
+        { name: "zucchini", quantity: 1, unit: "piece" },
+        { name: "carrot", quantity: 1, unit: "piece" },
+        { name: "tomatoes", quantity: 2, unit: "pieces" },
+        { name: "olive oil", quantity: 2, unit: "tbsp" },
+        { name: "salt and pepper", quantity: 0, unit: "to taste" },
+        { name: "fresh herbs (basil, parsley)", quantity: 0, unit: "to taste" }
+      ]
     },
     {
       id: "2", 
       title: "Healthy Breakfast Bowl",
       image: breakfastImage,
       rating: 4,
-      category: "Breakfast"
+      category: "Breakfast",
+      servings: 2,
+      ingredients: [
+        { name: "oats", quantity: 100, unit: "g" },
+        { name: "banana", quantity: 1, unit: "piece" },
+        { name: "berries", quantity: 150, unit: "g" },
+        { name: "yogurt", quantity: 200, unit: "ml" },
+        { name: "honey", quantity: 2, unit: "tbsp" },
+        { name: "nuts", quantity: 30, unit: "g" }
+      ]
     }
   ];
 
