@@ -153,6 +153,7 @@ const RecipeDetailPage = () => {
     }
   };
 
+
   return (
     <div className="min-h-screen bg-background pb-20" style={{ position: "relative" }}>
       <div style={{ position: "absolute", top: 16, right: 16, display: "flex", flexDirection: "row", zIndex: 50 }}>
@@ -181,13 +182,15 @@ const RecipeDetailPage = () => {
             <Badge variant="secondary">{recipe.category}</Badge>
           </div>
           
-          <StarRating rating={recipe.rating} showNumber />
-          
-          <div className="flex items-center gap-6 mt-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
+          <div className="flex items-center justify-between mt-2">
+            <StarRating rating={recipe.rating} showNumber />
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
               <Clock className="w-4 h-4" />
               {recipe.cookTime}
             </div>
+          </div>
+          
+          <div className="flex items-center gap-6 mt-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4" />
               <div className="flex items-center gap-2">
@@ -229,12 +232,12 @@ const RecipeDetailPage = () => {
         </div>
 
         <div className="bg-card rounded-lg p-4 mb-6 shadow-card">
-          <h3 className="font-semibold text-card-foreground mb-2">Nutrition</h3>
-          <div className="flex items-center gap-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Calories</p>
-              <p className="text-lg font-semibold text-card-foreground">{recipe.calories}</p>
-            </div>
+          <div className="flex items-center gap-2 text-card-foreground">
+            <span className="font-semibold">Nutrition</span>
+            <span>-</span>
+            <span className="text-muted-foreground">Calories</span>
+            <span>-</span>
+            <span className="font-semibold">{recipe.calories}</span>
           </div>
         </div>
 
