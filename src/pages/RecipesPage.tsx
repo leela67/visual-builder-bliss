@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 
 const RecipesPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [isVegOnly, setIsVegOnly] = useState<boolean>(false);
   
   const categories = ["All", "Breakfast", "Lunch", "Dinner", "Dessert", "Snacks", "Fresh Pickles", "Juices"];
   
@@ -22,6 +23,7 @@ const RecipesPage = () => {
       rating: 5,
       category: "Dinner",
       servings: 4,
+      isVeg: true,
       ingredients: [
         { name: "pasta", quantity: 200, unit: "g" },
         { name: "zucchini", quantity: 1, unit: "piece" },
@@ -39,6 +41,7 @@ const RecipesPage = () => {
       rating: 4,
       category: "Breakfast",
       servings: 2,
+      isVeg: true,
       ingredients: [
         { name: "oats", quantity: 100, unit: "g" },
         { name: "banana", quantity: 1, unit: "piece" },
@@ -47,12 +50,31 @@ const RecipesPage = () => {
         { name: "honey", quantity: 2, unit: "tbsp" },
         { name: "nuts", quantity: 30, unit: "g" }
       ]
+    },
+    {
+      id: "3", 
+      title: "Chicken Curry",
+      image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&h=300&fit=crop",
+      rating: 5,
+      category: "Dinner",
+      servings: 4,
+      isVeg: false,
+      ingredients: [
+        { name: "chicken", quantity: 500, unit: "g" },
+        { name: "onions", quantity: 2, unit: "pieces" },
+        { name: "tomatoes", quantity: 3, unit: "pieces" },
+        { name: "ginger-garlic paste", quantity: 2, unit: "tbsp" },
+        { name: "spices", quantity: 0, unit: "to taste" },
+        { name: "oil", quantity: 3, unit: "tbsp" }
+      ]
     }
   ];
 
-  const filteredRecipes = selectedCategory === "All" 
-    ? recipes 
-    : recipes.filter(recipe => recipe.category === selectedCategory);
+  const filteredRecipes = recipes.filter(recipe => {
+    const categoryMatch = selectedCategory === "All" || recipe.category === selectedCategory;
+    const vegMatch = !isVegOnly || recipe.isVeg;
+    return categoryMatch && vegMatch;
+  });
 
   return (
     <div className="min-h-screen bg-background pb-20" style={{ position: "relative" }}>
@@ -77,6 +99,42 @@ const RecipesPage = () => {
               placeholder="Search recipes..." 
               className="pl-10 bg-background border-input"
             />
+          </div>
+
+          {/* Veg/Non-Veg iOS Toggle */}
+          <div className="flex items-center justify-center mb-4">
+            <label className="form-switch flex items-center cursor-pointer">
+              <span className="mr-3 text-sm font-medium text-foreground">
+                {isVegOnly ? 'Veg Only' : 'All Recipes'}
+              </span>
+              <input
+                type="checkbox"
+                checked={isVegOnly}
+                onChange={(e) => setIsVegOnly(e.target.checked)}
+                className="sr-only"
+              />
+              <div className="relative inline-block w-11 h-6 bg-gray-200 rounded-full transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                <div
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-300 ease-in-out ${
+                    isVegOnly ? 'translate-x-5 bg-green-500' : 'translate-x-0'
+                  }`}
+                >
+                  {isVegOnly && (
+                    <div className="w-full h-full rounded-full bg-green-500 flex items-center justify-center">
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    </div>
+                  )}
+                </div>
+                <div
+                  className={`absolute inset-0 rounded-full transition-colors duration-300 ease-in-out ${
+                    isVegOnly ? 'bg-green-500' : 'bg-gray-200'
+                  }`}
+                ></div>
+              </div>
+              <span className="ml-3 text-sm font-medium text-foreground">
+                🥬 Veg
+              </span>
+            </label>
           </div>
           
           <div className="flex gap-2 overflow-x-auto pb-2">

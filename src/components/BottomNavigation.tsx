@@ -1,4 +1,4 @@
-import { Home, BookOpen, ShoppingBag, Heart } from "lucide-react";
+import { Home, BookOpen, Utensils, Heart } from "lucide-react";
 import { User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -14,7 +14,7 @@ const BottomNavigation = () => {
   const navItems = [
     { icon: Home, label: "Home", path: "/" },
     { icon: BookOpen, label: "Recipes", path: "/recipes" },
-    { icon: ShoppingBag, label: "Products", path: "/products" },
+    { icon: Utensils, label: "K-Bank", path: "/k-bank" },
     { icon: Heart, label: "Favorites", path: "/favorites" },
   { icon: User, label: "Profile", path: "/profile" },
   ];

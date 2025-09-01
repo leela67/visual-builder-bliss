@@ -11,7 +11,7 @@ import InfoPage from "./pages/InfoPage";
 import RecipesPage from "./pages/RecipesPage";
 import RecipeDetailPage from "./pages/RecipeDetailPage";
 import CreateRecipePage from "./pages/CreateRecipePage";
-import ProductsPage from "./pages/ProductsPage";
+import KBankPage from "./pages/KBankPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import NotFound from "./pages/NotFound";
 
@@ -28,7 +28,7 @@ const App = () => (
           <Route path="/recipes" element={<RecipesPage />} />
           <Route path="/recipes/:id" element={<RecipeDetailPage />} />
           <Route path="/create-recipe" element={<CreateRecipePage />} />
-          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/k-bank" element={<KBankPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegistrationPage />} />
