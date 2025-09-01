@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], // Vite default ports
+  origin: true, // Allow all origins
   credentials: true
 }));
 app.use(express.json());
@@ -21,11 +21,62 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Recipe API Server is running' });
 });
 
-// Recipe API Routes
+// Recipe API Routes - Order matters! Specific routes before parameterized ones
+app.get('/api/recipes/featured', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 6;
+    console.log('⭐ Fetching featured recipes, limit:', limit);
+    const recipes = await db.getRecipes({
+      sortBy: 'popular',
+      limit,
+      skip: 0
+    });
+    res.json(recipes);
+  } catch (error) {
+    console.error('❌ Error fetching featured recipes:', error);
+    res.status(500).json({ error: 'Failed to fetch featured recipes', details: error.message });
+  }
+});
+
+app.get('/api/recipes/search', async (req, res) => {
+  try {
+    const { q: query, category, limit } = req.query;
+    console.log('🔎 Searching recipes for:', query);
+    
+    const allRecipes = await db.getRecipes({
+      category: category || undefined,
+      limit: limit ? parseInt(limit) : 20
+    });
+
+    if (!query || !query.trim()) {
+      return res.json(allRecipes);
+    }
+
+    const searchTerms = query.toLowerCase().split(' ');
+    const filteredRecipes = allRecipes.filter(recipe => {
+      const searchableText = [
+        recipe.title,
+        recipe.category,
+        recipe.cuisine,
+        ...(recipe.tags || []),
+        ...recipe.ingredients.map(ing => ing.name)
+      ].join(' ').toLowerCase();
+
+      return searchTerms.some(term => searchableText.includes(term));
+    });
+    
+    res.json(filteredRecipes);
+  } catch (error) {
+    console.error('❌ Error searching recipes:', error);
+    res.status(500).json({ error: 'Failed to search recipes', details: error.message });
+  }
+});
+
 app.post('/api/recipes', async (req, res) => {
   try {
     console.log('📝 Creating new recipe:', req.body.title);
     const recipe = await db.createRecipe(req.body);
+    console.log('✅ Recipe created successfully:', recipe._id);
     res.status(201).json(recipe);
   } catch (error) {
     console.error('❌ Error creating recipe:', error);
@@ -115,58 +166,6 @@ app.get('/api/recipes/:id/views', async (req, res) => {
   } catch (error) {
     console.error('❌ Error getting view count:', error);
     res.status(500).json({ error: 'Failed to get view count', details: error.message });
-  }
-});
-
-app.get('/api/recipes/featured', async (req, res) => {
-  try {
-    const limit = parseInt(req.query.limit) || 6;
-    console.log('⭐ Fetching featured recipes, limit:', limit);
-    const recipes = await db.getRecipes({
-      sortBy: 'popular',
-      limit,
-      skip: 0
-    });
-    res.json(recipes);
-  } catch (error) {
-    console.error('❌ Error fetching featured recipes:', error);
-    res.status(500).json({ error: 'Failed to fetch featured recipes', details: error.message });
-  }
-});
-
-app.get('/api/recipes/search', async (req, res) => {
-  try {
-    const { q: query, category, limit } = req.query;
-    console.log('🔎 Searching recipes for:', query);
-    
-    // Get all recipes first
-    const allRecipes = await db.getRecipes({
-      category: category || undefined,
-      limit: limit ? parseInt(limit) : 20
-    });
-
-    if (!query || !query.trim()) {
-      return res.json(allRecipes);
-    }
-
-    const searchTerms = query.toLowerCase().split(' ');
-    
-    const filteredRecipes = allRecipes.filter(recipe => {
-      const searchableText = [
-        recipe.title,
-        recipe.category,
-        recipe.cuisine,
-        ...(recipe.tags || []),
-        ...recipe.ingredients.map(ing => ing.name)
-      ].join(' ').toLowerCase();
-
-      return searchTerms.some(term => searchableText.includes(term));
-    });
-    
-    res.json(filteredRecipes);
-  } catch (error) {
-    console.error('❌ Error searching recipes:', error);
-    res.status(500).json({ error: 'Failed to search recipes', details: error.message });
   }
 });
 
