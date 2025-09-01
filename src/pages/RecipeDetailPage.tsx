@@ -1,4 +1,4 @@
-import { ArrowLeft, Clock, Users, Youtube, Share2, Eye, Plus, Minus, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Clock, Users, Youtube, Share2, Eye, Plus, Minus, AlertTriangle, Loader2 } from "lucide-react";
 import InfoIconButton from "../components/ui/InfoIconButton";
 import LoginIconButton from "../components/ui/LoginIconButton";
 import { Button } from "@/components/ui/button";
@@ -10,14 +10,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import StarRating from "@/components/StarRating";
 import BottomNavigation from "@/components/BottomNavigation";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useViewCounter } from "@/hooks/useViewCounter";
-import pastaImage from "@/assets/pasta-vegetables.jpg";
+import { RecipeAPI } from "@/api/recipes";
+import { type IRecipe } from "@/models";
 
 const RecipeDetailPage = () => {
   const { id } = useParams();
-  const { incrementView, getViewCount } = useViewCounter();
+  const navigate = useNavigate();
+  const [recipe, setRecipe] = useState<IRecipe | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentServings, setCurrentServings] = useState(1);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [issueDescription, setIssueDescription] = useState("");
   
   // Helper function to convert YouTube URL to embed URL
   const getEmbedUrl = (url: string) => {
@@ -25,80 +30,37 @@ const RecipeDetailPage = () => {
     return `https://www.youtube.com/embed/${videoId}`;
   };
   
-  // Mock data - in a real app, you'd fetch based on id
-  const recipeData = {
-    "1": {
-      id: "1",
-      title: "Pasta with Vegetables",
-      image: pastaImage,
-      rating: 5,
-      category: "Dinner",
-      cookTime: "25 min",
-      servings: 4,
-      calories: 300,
-      ingredients: [
-        { name: "pasta", quantity: 200, unit: "g" },
-        { name: "zucchini", quantity: 1, unit: "piece" },
-        { name: "carrot", quantity: 1, unit: "piece" },
-        { name: "tomatoes", quantity: 2, unit: "pieces" },
-        { name: "olive oil", quantity: 2, unit: "tbsp" },
-        { name: "salt and pepper", quantity: 0, unit: "to taste" },
-        { name: "fresh herbs (basil, parsley)", quantity: 0, unit: "to taste" }
-      ],
-      instructions: [
-        "Cook pasta according to package instructions until al dente.",
-        "Meanwhile, dice the zucchini, carrot, and tomatoes.",
-        "Heat olive oil in a large pan over medium heat.",
-        "Add vegetables and cook for 5-7 minutes until tender.",
-        "Drain pasta and add to the pan with vegetables.",
-        "Toss everything together and season with salt and pepper.",
-        "Garnish with fresh herbs and serve hot."
-      ],
-      videoUrl: "https://youtube.com/watch?v=dQw4w9WgXcQ"
-    },
-    "2": {
-      id: "2",
-      title: "Healthy Breakfast Bowl",
-      image: "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?w=400&h=300&fit=crop",
-      rating: 4,
-      category: "Breakfast",
-      cookTime: "10 min",
-      servings: 2,
-      calories: 350,
-      ingredients: [
-        { name: "oats", quantity: 100, unit: "g" },
-        { name: "banana", quantity: 1, unit: "piece" },
-        { name: "berries", quantity: 150, unit: "g" },
-        { name: "yogurt", quantity: 200, unit: "ml" },
-        { name: "honey", quantity: 2, unit: "tbsp" },
-        { name: "nuts", quantity: 30, unit: "g" }
-      ],
-      instructions: [
-        "Cook oats according to package instructions.",
-        "Slice the banana into rounds.",
-        "In a bowl, layer the cooked oats.",
-        "Top with yogurt, banana slices, and berries.",
-        "Drizzle with honey and sprinkle with nuts.",
-        "Serve immediately and enjoy!"
-      ],
-      videoUrl: "https://youtube.com/watch?v=dQw4w9WgXcQ"
-    }
-  };
-
-  const recipe = recipeData[id as keyof typeof recipeData] || recipeData["1"];
-  const [currentServings, setCurrentServings] = useState(recipe.servings);
-  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
-  const [issueDescription, setIssueDescription] = useState("");
-  
   useEffect(() => {
-    if (id) {
-      incrementView(id);
-    }
-  }, [id, incrementView]);
+    const fetchRecipe = async () => {
+      if (!id) {
+        navigate('/recipes');
+        return;
+      }
 
-  useEffect(() => {
-    setCurrentServings(recipe.servings);
-  }, [recipe.servings]);
+      try {
+        setIsLoading(true);
+        const fetchedRecipe = await RecipeAPI.getRecipe(id);
+        
+        if (!fetchedRecipe) {
+          navigate('/recipes');
+          return;
+        }
+
+        setRecipe(fetchedRecipe);
+        setCurrentServings(fetchedRecipe.servings);
+        
+        // Increment view count
+        await RecipeAPI.incrementViewCount(id);
+      } catch (error) {
+        console.error('Error fetching recipe:', error);
+        navigate('/recipes');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRecipe();
+  }, [id, navigate]);
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -134,10 +96,10 @@ const RecipeDetailPage = () => {
   };
 
   const handleReportSubmit = () => {
-    if (issueDescription.trim()) {
+    if (issueDescription.trim() && recipe) {
       // In a real app, this would send the report to your backend
       console.log("Report submitted:", {
-        recipeId: recipe.id,
+        recipeId: recipe._id,
         recipeTitle: recipe.title,
         category: recipe.category,
         issueDescription,
@@ -152,6 +114,30 @@ const RecipeDetailPage = () => {
       setIsReportDialogOpen(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Loading recipe...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!recipe) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-foreground mb-4">Recipe not found</p>
+          <Link to="/recipes">
+            <Button>Back to Recipes</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
 
   return (
@@ -187,7 +173,7 @@ const RecipeDetailPage = () => {
               <StarRating rating={recipe.rating} showNumber />
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <Eye className="w-4 h-4" />
-                {id && getViewCount(id)} views
+                {recipe.viewCount} views
               </div>
             </div>
           </div>
@@ -323,7 +309,7 @@ const RecipeDetailPage = () => {
                 <div className="bg-accent/20 p-3 rounded-lg text-sm">
                   <p><strong>Recipe:</strong> {recipe.title}</p>
                   <p><strong>Category:</strong> {recipe.category}</p>
-                  <p><strong>Recipe ID:</strong> {recipe.id}</p>
+                  <p><strong>Recipe ID:</strong> {recipe._id}</p>
                 </div>
                 
                 <div className="space-y-2">

@@ -8,8 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import BottomNavigation from "@/components/BottomNavigation";
 import RecipeCard from "@/components/RecipeCard";
 import { Link } from "react-router-dom";
-import pastaImage from "@/assets/pasta-vegetables.jpg";
-import breakfastImage from "@/assets/breakfast-bowl.jpg";
 
 const RecipesPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -20,7 +18,7 @@ const RecipesPage = () => {
     {
       id: "1",
       title: "Pasta with Vegetables",
-      image: pastaImage,
+      image: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400&h=300&fit=crop",
       rating: 5,
       category: "Dinner",
       servings: 4,
@@ -37,7 +35,7 @@ const RecipesPage = () => {
     {
       id: "2", 
       title: "Healthy Breakfast Bowl",
-      image: breakfastImage,
+      image: "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?w=400&h=300&fit=crop",
       rating: 4,
       category: "Breakfast",
       servings: 2,

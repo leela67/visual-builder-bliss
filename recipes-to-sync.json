@@ -1,0 +1,5 @@
+{
+  "instructions": "Export your localStorage recipes and paste them in the 'recipes' array below",
+  "howToExport": "In browser console, run: console.log(JSON.stringify(JSON.parse(localStorage.getItem('demo-recipes') || '[]'), null, 2))",
+  "recipes": []
+}

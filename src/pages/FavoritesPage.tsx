@@ -5,14 +5,13 @@ import { Button } from "@/components/ui/button";
 import BottomNavigation from "@/components/BottomNavigation";
 import RecipeCard from "@/components/RecipeCard";
 import { Link } from "react-router-dom";
-import pastaImage from "@/assets/pasta-vegetables.jpg";
 
 const FavoritesPage = () => {
   const favoriteRecipes = [
     {
       id: "1",
       title: "Pasta with Vegetables",
-      image: pastaImage,
+      image: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400&h=300&fit=crop",
       rating: 5,
       category: "Dinner"
     }

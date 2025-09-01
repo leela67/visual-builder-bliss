@@ -7,40 +7,38 @@ import { Card } from "@/components/ui/card";
 import { Link, useNavigate } from "react-router-dom";
 import BottomNavigation from "@/components/BottomNavigation";
 import RecipeCard from "@/components/RecipeCard";
-import pastaImage from "@/assets/pasta-vegetables.jpg";
-import breakfastImage from "@/assets/breakfast-bowl.jpg";
+import { useState, useEffect } from "react";
+import { RecipeAPI } from "@/api/recipes";
+import { type IRecipe } from "@/models";
 
 const HomePage = () => {
   const navigate = useNavigate();
-  
-  const featuredRecipes = [
-    {
-      id: "1",
-      title: "Pasta with Vegetables",
-      image: pastaImage,
-      rating: 5,
-      category: "Dinner"
-    },
-    {
-      id: "2", 
-      title: "Healthy Breakfast Bowl",
-      image: breakfastImage,
-      rating: 4,
-      category: "Breakfast"
-    },
-    {
-      id: "3",
-      title: "Mediterranean Salad",
-      image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop",
-      rating: 4,
-      category: "Lunch"
-    }
-  ];
+  const [featuredRecipes, setFeaturedRecipes] = useState<IRecipe[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeaturedRecipes = async () => {
+      try {
+        const recipes = await RecipeAPI.getFeaturedRecipes(6);
+        setFeaturedRecipes(recipes);
+      } catch (error) {
+        console.error('Error fetching featured recipes:', error);
+        // Fallback to empty array
+        setFeaturedRecipes([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFeaturedRecipes();
+  }, []);
 
   const handleWhatToCook = () => {
     // Get a random recipe from available recipes
-    const randomRecipe = featuredRecipes[Math.floor(Math.random() * featuredRecipes.length)];
-    navigate(`/recipes/${randomRecipe.id}`);
+    if (featuredRecipes.length > 0) {
+      const randomRecipe = featuredRecipes[Math.floor(Math.random() * featuredRecipes.length)];
+      navigate(`/recipes/${randomRecipe._id}`);
+    }
   };
 
   // Placeholder social media posts
@@ -52,7 +50,7 @@ const HomePage = () => {
       content: "Check out this amazing pasta dish! 🍝 Simple ingredients, incredible flavor. What's your favorite comfort food?",
       likes: 124,
       time: "2h ago",
-      image: pastaImage
+      image: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400&h=300&fit=crop"
     },
     {
       id: 2,
@@ -61,7 +59,7 @@ const HomePage = () => {
       content: "Starting your morning right with this nutritious breakfast bowl! 🥣 Packed with oats, fresh fruits, and energy for the day ahead.",
       likes: 89,
       time: "4h ago",
-      image: breakfastImage
+      image: "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?w=400&h=300&fit=crop"
     },
     {
       id: 3,
@@ -140,9 +138,28 @@ const HomePage = () => {
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {featuredRecipes.map((recipe) => (
-              <RecipeCard key={recipe.id} {...recipe} />
-            ))}
+            {isLoading ? (
+              // Loading skeleton
+              Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="animate-pulse">
+                  <div className="bg-card rounded-lg overflow-hidden shadow-card">
+                    <div className="aspect-[4/3] bg-accent/20"></div>
+                    <div className="p-4">
+                      <div className="h-4 bg-accent/20 rounded mb-2"></div>
+                      <div className="h-3 bg-accent/20 rounded w-20"></div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : featuredRecipes.length > 0 ? (
+              featuredRecipes.map((recipe) => (
+                <RecipeCard key={recipe._id} id={recipe._id!} title={recipe.title} image={recipe.image} rating={recipe.rating} category={recipe.category} />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-8 text-muted-foreground">
+                No recipes found. <Link to="/create-recipe" className="text-primary hover:underline">Create your first recipe!</Link>
+              </div>
+            )}
           </div>
         </section>
 
