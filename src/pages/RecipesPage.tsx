@@ -76,10 +76,30 @@ const RecipesPage = () => {
   });
 
   return (
-    <div className="min-h-screen bg-background pt-20 pb-32" style={{ position: "relative" }}>
-      {/* Fixed Top Navigation Bar */}
-      <div className="fixed top-0 left-0 right-0 bg-card border-b border-border z-50">
-        <BottomNavigation />
+    <div className="min-h-screen bg-background pt-20 pb-20" style={{ position: "relative" }}>
+      {/* Fixed Top Action Bar */}
+      <div className="fixed top-0 left-0 right-0 bg-card border-b border-border shadow-sm z-50">
+        <div className="flex items-center justify-center px-4 py-3 max-w-screen-xl mx-auto">
+          <div className="flex items-center gap-4">
+            <InfoIconButton />
+            <Link to="/create-recipe">
+              <Button 
+                size="sm" 
+                className="gap-2 py-3 bg-secondary text-secondary-foreground hover:bg-secondary/90"
+              >
+                <Plus className="w-4 h-4" />
+                Create Recipe
+              </Button>
+            </Link>
+            <Button 
+              size="sm" 
+              className="max-w-40 gap-2 py-3 bg-primary text-primary-foreground font-semibold shadow-lg border-0 hover:scale-105 transition-transform duration-200"
+            >
+              <ChefHat className="w-4 h-4" />
+              What to Cook
+            </Button>
+          </div>
+        </div>
       </div>
 
       <header className="bg-card shadow-card border-b border-border">
@@ -180,29 +200,9 @@ const RecipesPage = () => {
         )}
       </main>
 
-      {/* Fixed Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-sm z-50">
-        <div className="flex items-center justify-center px-4 py-3 max-w-screen-xl mx-auto">
-          <div className="flex items-center gap-4">
-            <InfoIconButton />
-            <Link to="/create-recipe">
-              <Button 
-                size="sm" 
-                className="gap-2 py-3 bg-secondary text-secondary-foreground hover:bg-secondary/90"
-              >
-                <Plus className="w-4 h-4" />
-                Create Recipe
-              </Button>
-            </Link>
-            <Button 
-              size="sm" 
-              className="max-w-40 gap-2 py-3 bg-primary text-primary-foreground font-semibold shadow-lg border-0 hover:scale-105 transition-transform duration-200"
-            >
-              <ChefHat className="w-4 h-4" />
-              What to Cook
-            </Button>
-          </div>
-        </div>
+      {/* Fixed Bottom Navigation Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
+        <BottomNavigation />
       </div>
     </div>
   );

@@ -16,11 +16,7 @@ const FavoritesPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background pt-20" style={{ position: "relative" }}>
-      {/* Fixed Top Navigation Bar */}
-      <div className="fixed top-0 left-0 right-0 bg-card border-b border-border z-50">
-        <BottomNavigation />
-      </div>
+    <div className="min-h-screen bg-background pb-20" style={{ position: "relative" }}>
       <header className="bg-card shadow-card border-b border-border">
         <div className="px-4 py-4">
         </div>
@@ -49,6 +45,10 @@ const FavoritesPage = () => {
         )}
       </main>
 
+      {/* Fixed Bottom Navigation Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
+        <BottomNavigation />
+      </div>
     </div>
   );
 };

@@ -8,11 +8,7 @@ import BottomNavigation from "@/components/BottomNavigation";
 
 export default function ProfilePage() {
   return (
-    <div className="min-h-screen bg-background pt-20 flex flex-col" style={{ position: "relative" }}>
-      {/* Fixed Top Navigation Bar */}
-      <div className="fixed top-0 left-0 right-0 bg-card border-b border-border z-50">
-        <BottomNavigation />
-      </div>
+    <div className="min-h-screen bg-background pb-20 flex flex-col" style={{ position: "relative" }}>
       <header className="bg-card shadow-card border-b border-border w-full">
         <div className="px-4 py-4">
         </div>
@@ -53,6 +49,11 @@ export default function ProfilePage() {
           </button>
         </div>
       </main>
+      
+      {/* Fixed Bottom Navigation Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
+        <BottomNavigation />
+      </div>
     </div>
   );
 }
