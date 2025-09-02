@@ -1,16 +1,18 @@
 
 import React from "react";
-import InfoIconButton from "../components/ui/InfoIconButton";
 import BackIconButton from "../components/ui/BackIconButton";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
-import LoginIconButton from "../components/ui/LoginIconButton";
 import BottomNavigation from "@/components/BottomNavigation";
 
 export default function ProfilePage() {
   return (
-    <div className="min-h-screen bg-background pb-20 flex flex-col" style={{ position: "relative" }}>
+    <div className="min-h-screen bg-background pt-20 flex flex-col" style={{ position: "relative" }}>
+      {/* Fixed Top Navigation Bar */}
+      <div className="fixed top-0 left-0 right-0 bg-card border-b border-border z-50">
+        <BottomNavigation />
+      </div>
       <header className="bg-card shadow-card border-b border-border w-full">
         <div className="px-4 py-4">
           <div className="flex items-center gap-3 mb-4">
@@ -20,10 +22,6 @@ export default function ProfilePage() {
               </Button>
             </Link>
             <h1 className="text-xl font-semibold text-foreground">Profile</h1>
-            <div className="flex ml-auto gap-2">
-              <InfoIconButton />
-              <LoginIconButton />
-            </div>
           </div>
         </div>
       </header>
@@ -63,7 +61,6 @@ export default function ProfilePage() {
           </button>
         </div>
       </main>
-      <BottomNavigation />
     </div>
   );
 }

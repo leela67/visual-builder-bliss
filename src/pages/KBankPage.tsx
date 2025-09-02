@@ -1,6 +1,4 @@
 import { ArrowLeft, Utensils, Leaf, Fish, Cookie, Soup, Users, Heart, Sprout } from "lucide-react";
-import InfoIconButton from "../components/ui/InfoIconButton";
-import LoginIconButton from "../components/ui/LoginIconButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import BottomNavigation from "@/components/BottomNavigation";
@@ -131,10 +129,10 @@ const KBankPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background pb-20" style={{ position: "relative" }}>
-      <div style={{ position: "absolute", top: 16, right: 16, display: "flex", flexDirection: "row", zIndex: 50 }}>
-        <InfoIconButton />
-        <LoginIconButton />
+    <div className="min-h-screen bg-background pt-20" style={{ position: "relative" }}>
+      {/* Fixed Top Navigation Bar */}
+      <div className="fixed top-0 left-0 right-0 bg-card border-b border-border z-50">
+        <BottomNavigation />
       </div>
       
       <header className="bg-card shadow-card border-b border-border">
@@ -317,7 +315,6 @@ const KBankPage = () => {
         </div>
       </main>
 
-      <BottomNavigation />
     </div>
   );
 };
