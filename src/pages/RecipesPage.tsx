@@ -85,15 +85,16 @@ const RecipesPage = () => {
       <header className="bg-card shadow-card border-b border-border">
         <div className="px-4 py-4">
           <div className="flex items-center gap-3 mb-4">
-            <Link to="/">
-              <Button variant="ghost" size="sm" className="p-2">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
-            <h1 className="text-xl font-semibold text-foreground">Recipes</h1>
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input 
+                placeholder="Search recipes..." 
+                className="pl-10 pr-4 bg-background border-input"
+              />
+            </div>
             
-            {/* Veg/Non-Veg iOS Toggle - After Recipes Title */}
-            <label className="form-switch flex items-center cursor-pointer ml-4">
+            {/* Veg/Non-Veg iOS Toggle */}
+            <label className="form-switch flex items-center cursor-pointer flex-shrink-0">
               <span className="mr-2 text-xs font-medium text-foreground">
                 {isVegOnly ? 'Veg' : 'All'}
               </span>
@@ -134,14 +135,6 @@ const RecipesPage = () => {
                 )}
               </div>
             </label>
-          </div>
-          
-          <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input 
-              placeholder="Search recipes..." 
-              className="pl-10 bg-background border-input"
-            />
           </div>
           
           <div className="flex gap-2 overflow-x-auto pb-2">
@@ -194,18 +187,18 @@ const RecipesPage = () => {
             <InfoIconButton />
             <Link to="/create-recipe">
               <Button 
-                size="sm" 
-                className="gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/90"
+                size="lg" 
+                className="gap-3 px-6 py-4 text-base bg-secondary text-secondary-foreground hover:bg-secondary/90"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-5 h-5" />
                 Create Recipe
               </Button>
             </Link>
             <Button 
-              size="sm" 
-              className="max-w-40 gap-2 bg-primary text-primary-foreground font-semibold shadow-lg border-0 hover:scale-105 transition-transform duration-200"
+              size="lg" 
+              className="gap-3 px-6 py-4 text-base bg-primary text-primary-foreground font-semibold shadow-lg border-0 hover:scale-105 transition-transform duration-200"
             >
-              <ChefHat className="w-4 h-4" />
+              <ChefHat className="w-5 h-5" />
               What to Cook
             </Button>
           </div>

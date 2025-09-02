@@ -93,13 +93,6 @@ const HomePage = () => {
 
       <header className="bg-card shadow-card border-b border-border">
         <div className="px-4 py-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-              <ChefHat className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <h1 className="text-2xl font-bold text-foreground">Recipes</h1>
-          </div>
-          
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input 
@@ -231,19 +224,19 @@ const HomePage = () => {
             <InfoIconButton />
             <Link to="/create-recipe">
               <Button 
-                size="sm" 
-                className="gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/90"
+                size="lg" 
+                className="gap-3 px-6 py-4 text-base bg-secondary text-secondary-foreground hover:bg-secondary/90"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-5 h-5" />
                 Create Recipe
               </Button>
             </Link>
             <Button 
               onClick={handleWhatToCook}
-              size="sm" 
-              className="max-w-40 gap-2 bg-primary text-primary-foreground font-semibold shadow-lg border-0 hover:scale-105 transition-transform duration-200"
+              size="lg" 
+              className="gap-3 px-6 py-4 text-base bg-primary text-primary-foreground font-semibold shadow-lg border-0 hover:scale-105 transition-transform duration-200"
             >
-              <ChefHat className="w-4 h-4" />
+              <ChefHat className="w-5 h-5" />
               What to Cook
             </Button>
           </div>
