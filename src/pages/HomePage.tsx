@@ -1,6 +1,5 @@
 import { Search, ChefHat, Instagram, Twitter, Facebook, Plus } from "lucide-react";
 import InfoIconButton from "../components/ui/InfoIconButton";
-import LoginIconButton from "../components/ui/LoginIconButton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -227,20 +226,9 @@ const HomePage = () => {
 
       {/* Fixed Bottom Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-sm z-50">
-        <div className="flex items-center justify-center px-4 py-3 max-w-screen-xl mx-auto relative">
-          <div className="absolute right-4 flex items-center gap-2">
-            <InfoIconButton />
-            <LoginIconButton />
-          </div>
+        <div className="flex items-center justify-center px-4 py-3 max-w-screen-xl mx-auto">
           <div className="flex items-center gap-4">
-            <Button 
-              onClick={handleWhatToCook}
-              size="sm" 
-              className="max-w-40 gap-2 bg-primary text-primary-foreground font-semibold shadow-lg border-0 hover:scale-105 transition-transform duration-200"
-            >
-              <ChefHat className="w-4 h-4" />
-              What to Cook
-            </Button>
+            <InfoIconButton />
             <Link to="/create-recipe">
               <Button 
                 size="sm" 
@@ -250,6 +238,14 @@ const HomePage = () => {
                 Create Recipe
               </Button>
             </Link>
+            <Button 
+              onClick={handleWhatToCook}
+              size="sm" 
+              className="max-w-40 gap-2 bg-primary text-primary-foreground font-semibold shadow-lg border-0 hover:scale-105 transition-transform duration-200"
+            >
+              <ChefHat className="w-4 h-4" />
+              What to Cook
+            </Button>
           </div>
         </div>
       </div>
