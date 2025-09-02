@@ -155,50 +155,6 @@ const KBankPage = () => {
 
       <main className="px-4 py-6 space-y-6">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-foreground mb-2">Food Categories</h2>
-          <p className="text-muted-foreground">
-            Discover the essential food groups for a balanced and healthy diet
-          </p>
-        </div>
-
-        <div className="grid gap-6">
-          {foodCategories.map((category) => (
-            <Card key={category.id} className={`${category.color} transition-all hover:shadow-md`}>
-              <CardHeader className="pb-3">
-                <div className="flex items-start gap-4">
-                  <div className={`${category.iconColor} flex-shrink-0`}>
-                    {category.icon}
-                  </div>
-                  <div className="flex-1">
-                    <CardTitle className="text-lg font-semibold text-foreground mb-2">
-                      {category.title}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      {category.description}
-                    </p>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-2">
-                  <h4 className="font-medium text-foreground text-sm">Examples:</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {category.examples.map((example, index) => (
-                      <span
-                        key={index}
-                        className="px-3 py-1 bg-background/60 border border-border rounded-full text-xs text-foreground"
-                      >
-                        {example}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <div className="text-center mb-8 mt-12">
           <h2 className="text-2xl font-bold text-foreground mb-2">Understanding Food Habits</h2>
           <p className="text-muted-foreground">
             Different dietary preferences based on health, ethical, environmental, or cultural reasons
@@ -300,6 +256,50 @@ const KBankPage = () => {
               </div>
             ))}
           </div>
+        </div>
+
+        <div className="text-center mb-8 mt-12">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Food Categories</h2>
+          <p className="text-muted-foreground">
+            Discover the essential food groups for a balanced and healthy diet
+          </p>
+        </div>
+
+        <div className="grid gap-6">
+          {foodCategories.map((category) => (
+            <Card key={category.id} className={`${category.color} transition-all hover:shadow-md`}>
+              <CardHeader className="pb-3">
+                <div className="flex items-start gap-4">
+                  <div className={`${category.iconColor} flex-shrink-0`}>
+                    {category.icon}
+                  </div>
+                  <div className="flex-1">
+                    <CardTitle className="text-lg font-semibold text-foreground mb-2">
+                      {category.title}
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      {category.description}
+                    </p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-2">
+                  <h4 className="font-medium text-foreground text-sm">Examples:</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {category.examples.map((example, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-background/60 border border-border rounded-full text-xs text-foreground"
+                      >
+                        {example}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">

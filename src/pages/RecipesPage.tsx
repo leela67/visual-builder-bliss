@@ -1,7 +1,7 @@
 import { useState } from "react";
 import InfoIconButton from "../components/ui/InfoIconButton";
 import LoginIconButton from "../components/ui/LoginIconButton";
-import { Search, Filter, ArrowLeft } from "lucide-react";
+import { Search, Filter, ArrowLeft, ChefHat, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -77,8 +77,30 @@ const RecipesPage = () => {
   });
 
   return (
-    <div className="min-h-screen bg-background pb-20" style={{ position: "relative" }}>
-      <div style={{ position: "absolute", top: 16, right: 16, display: "flex", flexDirection: "row", zIndex: 50 }}>
+    <div className="min-h-screen bg-background pb-20 pt-16" style={{ position: "relative" }}>
+      {/* Fixed Top Action Bar */}
+      <div className="fixed top-0 left-0 right-0 bg-card border-b border-border shadow-sm z-50">
+        <div className="flex items-center justify-center gap-4 px-4 py-3 max-w-screen-xl mx-auto">
+          <Button 
+            size="sm" 
+            className="flex-1 max-w-40 gap-2 bg-primary text-primary-foreground font-semibold shadow-lg border-0 hover:scale-105 transition-transform duration-200"
+          >
+            <ChefHat className="w-4 h-4" />
+            What to Cook
+          </Button>
+          <Link to="/create-recipe">
+            <Button 
+              size="sm" 
+              className="flex-1 max-w-40 gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/90"
+            >
+              <Plus className="w-4 h-4" />
+              Create Recipe
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      <div style={{ position: "absolute", top: 16, right: 16, display: "flex", flexDirection: "row", zIndex: 51 }}>
         <InfoIconButton />
         <LoginIconButton />
       </div>
@@ -91,6 +113,49 @@ const RecipesPage = () => {
               </Button>
             </Link>
             <h1 className="text-xl font-semibold text-foreground">Recipes</h1>
+            
+            {/* Veg/Non-Veg iOS Toggle - After Recipes Title */}
+            <label className="form-switch flex items-center cursor-pointer ml-4">
+              <span className="mr-2 text-xs font-medium text-foreground">
+                {isVegOnly ? 'Veg' : 'All'}
+              </span>
+              <input
+                type="checkbox"
+                checked={isVegOnly}
+                onChange={(e) => setIsVegOnly(e.target.checked)}
+                className="sr-only"
+              />
+              <div className="relative inline-block w-10 h-6 bg-gray-300 rounded-full transition-colors duration-300 ease-in-out">
+                <div
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${
+                    isVegOnly ? 'translate-x-4 bg-white' : 'translate-x-0'
+                  }`}
+                >
+                  <div className={`w-full h-full rounded-full flex items-center justify-center ${
+                    isVegOnly ? 'bg-green-600' : 'bg-red-600'
+                  }`}>
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  </div>
+                </div>
+                <div
+                  className={`absolute inset-0 rounded-full transition-colors duration-300 ease-in-out ${
+                    isVegOnly ? 'bg-green-600' : 'bg-gray-300'
+                  }`}
+                ></div>
+              </div>
+              {/* Indian Veg/Non-Veg Symbols */}
+              <div className="ml-2 flex items-center">
+                {isVegOnly ? (
+                  <div className="w-4 h-4 border-2 border-green-600 bg-white flex items-center justify-center">
+                    <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                  </div>
+                ) : (
+                  <div className="w-4 h-4 border-2 border-red-600 bg-white flex items-center justify-center">
+                    <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                  </div>
+                )}
+              </div>
+            </label>
           </div>
           
           <div className="relative mb-4">
@@ -99,42 +164,6 @@ const RecipesPage = () => {
               placeholder="Search recipes..." 
               className="pl-10 bg-background border-input"
             />
-          </div>
-
-          {/* Veg/Non-Veg iOS Toggle */}
-          <div className="flex items-center justify-center mb-4">
-            <label className="form-switch flex items-center cursor-pointer">
-              <span className="mr-3 text-sm font-medium text-foreground">
-                {isVegOnly ? 'Veg Only' : 'All Recipes'}
-              </span>
-              <input
-                type="checkbox"
-                checked={isVegOnly}
-                onChange={(e) => setIsVegOnly(e.target.checked)}
-                className="sr-only"
-              />
-              <div className="relative inline-block w-11 h-6 bg-gray-200 rounded-full transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-                <div
-                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-300 ease-in-out ${
-                    isVegOnly ? 'translate-x-5 bg-green-500' : 'translate-x-0'
-                  }`}
-                >
-                  {isVegOnly && (
-                    <div className="w-full h-full rounded-full bg-green-500 flex items-center justify-center">
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
-                    </div>
-                  )}
-                </div>
-                <div
-                  className={`absolute inset-0 rounded-full transition-colors duration-300 ease-in-out ${
-                    isVegOnly ? 'bg-green-500' : 'bg-gray-200'
-                  }`}
-                ></div>
-              </div>
-              <span className="ml-3 text-sm font-medium text-foreground">
-                🥬 Veg
-              </span>
-            </label>
           </div>
           
           <div className="flex gap-2 overflow-x-auto pb-2">

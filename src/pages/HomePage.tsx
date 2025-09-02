@@ -1,4 +1,4 @@
-import { Search, ChefHat, CheckCircle, Instagram, Twitter, Facebook } from "lucide-react";
+import { Search, ChefHat, Instagram, Twitter, Facebook, Plus } from "lucide-react";
 import InfoIconButton from "../components/ui/InfoIconButton";
 import LoginIconButton from "../components/ui/LoginIconButton";
 import { Input } from "@/components/ui/input";
@@ -86,8 +86,31 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20" style={{ position: "relative" }}>
-      <div style={{ position: "absolute", top: 16, right: 16, display: "flex", flexDirection: "row", zIndex: 50 }}>
+    <div className="min-h-screen bg-background pb-20 pt-16" style={{ position: "relative" }}>
+      {/* Fixed Top Action Bar */}
+      <div className="fixed top-0 left-0 right-0 bg-card border-b border-border shadow-sm z-50">
+        <div className="flex items-center justify-center gap-4 px-4 py-3 max-w-screen-xl mx-auto">
+          <Button 
+            onClick={handleWhatToCook}
+            size="sm" 
+            className="flex-1 max-w-40 gap-2 bg-primary text-primary-foreground font-semibold shadow-lg border-0 hover:scale-105 transition-transform duration-200"
+          >
+            <ChefHat className="w-4 h-4" />
+            What to Cook
+          </Button>
+          <Link to="/create-recipe">
+            <Button 
+              size="sm" 
+              className="flex-1 max-w-40 gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/90"
+            >
+              <Plus className="w-4 h-4" />
+              Create Recipe
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      <div style={{ position: "absolute", top: 16, right: 16, display: "flex", flexDirection: "row", zIndex: 51 }}>
         <InfoIconButton />
         <LoginIconButton />
       </div>
@@ -106,21 +129,6 @@ const HomePage = () => {
               placeholder="Search recipes..." 
               className="pl-10 bg-background border-input"
             />
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Button 
-              onClick={handleWhatToCook}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground py-3 text-sm font-medium gap-2 animate-glow"
-            >
-              <CheckCircle className="w-5 h-5" />
-              What to Cook
-            </Button>
-            <Link to="/create-recipe">
-              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 text-sm font-medium">
-                Create Your Own Recipe
-              </Button>
-            </Link>
           </div>
         </div>
       </header>

@@ -8,6 +8,9 @@ export default defineConfig(({ mode }) => ({
   base: "/visual-builder-bliss/",
   build: {
     outDir: "docs",
+    rollupOptions: {
+      external: ['mongoose', 'fs', 'path']
+    }
   },
   server: {
     host: "::",
