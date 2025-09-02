@@ -187,18 +187,18 @@ const RecipesPage = () => {
             <InfoIconButton />
             <Link to="/create-recipe">
               <Button 
-                size="lg" 
-                className="gap-3 px-6 py-4 text-base bg-secondary text-secondary-foreground hover:bg-secondary/90"
+                size="sm" 
+                className="gap-2 py-3 bg-secondary text-secondary-foreground hover:bg-secondary/90"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-4 h-4" />
                 Create Recipe
               </Button>
             </Link>
             <Button 
-              size="lg" 
-              className="gap-3 px-6 py-4 text-base bg-primary text-primary-foreground font-semibold shadow-lg border-0 hover:scale-105 transition-transform duration-200"
+              size="sm" 
+              className="max-w-40 gap-2 py-3 bg-primary text-primary-foreground font-semibold shadow-lg border-0 hover:scale-105 transition-transform duration-200"
             >
-              <ChefHat className="w-5 h-5" />
+              <ChefHat className="w-4 h-4" />
               What to Cook
             </Button>
           </div>
