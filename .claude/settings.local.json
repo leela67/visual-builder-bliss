@@ -10,7 +10,8 @@
       "Bash(PORT=3001 npm run dev:server)",
       "Bash(curl:*)",
       "Bash(taskkill:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

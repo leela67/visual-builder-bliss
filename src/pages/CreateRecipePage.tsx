@@ -199,9 +199,9 @@ const CreateRecipePage = () => {
             <img 
               src={beingHomeLogo}
               alt="Being Home Logo" 
-              className="h-10 sm:h-12 md:h-15 w-auto object-contain max-w-[140px] sm:max-w-[180px] md:max-w-[220px]"
+              className="h-12 sm:h-14 md:h-16 w-12 sm:w-14 md:w-16 object-cover rounded-full"
               style={{ 
-                transform: 'scale(1.8, 1.4)',
+                transform: 'scale(1.5, 1.5)',
                 transformOrigin: 'left center'
               }}
               onError={(e) => {
