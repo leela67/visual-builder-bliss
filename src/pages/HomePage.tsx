@@ -36,39 +36,76 @@ const HomePage = () => {
   }, []);
 
   useEffect(() => {
+    let ticking = false;
+    
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      if (currentScrollY > lastScrollY && currentScrollY > 50) {
-        // Scrolling down - expand buttons
-        setIsExpanded(true);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          const scrollDiff = Math.abs(currentScrollY - lastScrollY);
+          
+          // Only process significant scroll changes to avoid Safari momentum issues
+          if (scrollDiff > 5) {
+            if (currentScrollY > lastScrollY && currentScrollY > 50) {
+              // Scrolling down - expand buttons
+              setIsExpanded(true);
+              
+              // Clear existing timeout when actively scrolling down
+              if (scrollTimeoutRef.current) {
+                clearTimeout(scrollTimeoutRef.current);
+              }
+              
+              // Set timeout to contract after 4 seconds for Safari compatibility
+              scrollTimeoutRef.current = setTimeout(() => {
+                setIsExpanded(false);
+              }, 4000);
+            } else if (currentScrollY < lastScrollY && scrollDiff > 10) {
+              // Scrolling up with significant movement - contract buttons
+              setIsExpanded(false);
+              
+              // Clear timeout when scrolling up
+              if (scrollTimeoutRef.current) {
+                clearTimeout(scrollTimeoutRef.current);
+              }
+            }
+            
+            setLastScrollY(currentScrollY);
+          }
+          
+          ticking = false;
+        });
         
-        // Clear existing timeout when actively scrolling down
-        if (scrollTimeoutRef.current) {
-          clearTimeout(scrollTimeoutRef.current);
-        }
-        
-        // Set timeout to contract after 3 seconds of no scrolling
-        scrollTimeoutRef.current = setTimeout(() => {
-          setIsExpanded(false);
-        }, 3000);
-      } else if (currentScrollY < lastScrollY) {
-        // Scrolling up - contract buttons immediately
-        setIsExpanded(false);
-        
-        // Clear timeout when scrolling up
-        if (scrollTimeoutRef.current) {
-          clearTimeout(scrollTimeoutRef.current);
-        }
+        ticking = true;
       }
-      
-      setLastScrollY(currentScrollY);
+    };
+
+    // Add touchstart and touchmove for iOS Safari
+    const handleTouchStart = () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+
+    const handleTouchEnd = () => {
+      // Delay to allow momentum scrolling to complete
+      setTimeout(() => {
+        if (window.scrollY > 50) {
+          setIsExpanded(true);
+          scrollTimeoutRef.current = setTimeout(() => {
+            setIsExpanded(false);
+          }, 4000);
+        }
+      }, 100);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
@@ -128,7 +165,13 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pt-20 pb-20" style={{ position: "relative" }}>
+    <div 
+      className="min-h-screen bg-background pt-20 pb-20" 
+      style={{ 
+        position: "relative",
+        WebkitOverflowScrolling: "touch"
+      }}
+    >
       {/* Fixed Top Action Bar */}
       <div className="fixed top-0 left-0 right-0 bg-card border-b border-border shadow-sm z-50">
         <div className="flex items-center justify-between px-4 py-3 max-w-screen-xl mx-auto">
