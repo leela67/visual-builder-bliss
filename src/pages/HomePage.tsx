@@ -9,6 +9,7 @@ import RecipeCard from "@/components/RecipeCard";
 import { useState, useEffect, useRef } from "react";
 import { RecipeAPI } from "@/api/recipes";
 import { type IRecipe } from "@/models";
+import beingHomeLogo from "/beinghomelogo.jpeg";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -166,26 +167,35 @@ const HomePage = () => {
 
   return (
     <div 
-      className="min-h-screen bg-background pt-20 pb-20" 
+      className="min-h-screen bg-background pb-20" 
       style={{ 
         position: "relative",
         WebkitOverflowScrolling: "touch"
       }}
     >
-      {/* Fixed Top Action Bar */}
-      <div className="fixed top-0 left-0 right-0 bg-card border-b border-border shadow-sm z-50">
-        <div className="flex items-center justify-between px-4 py-3 max-w-screen-xl mx-auto">
-          <img 
-            src="/beinghomelogo.jpeg" 
-            alt="Being Home Logo" 
-            className="h-8 sm:h-10 w-auto"
-          />
-          <InfoIconButton />
-        </div>
-      </div>
 
       <header className="bg-card shadow-card border-b border-border">
         <div className="px-4 py-6">
+          {/* Logo and Info Button Row */}
+          <div className="flex items-center justify-between mb-6">
+            {/* Being Home Logo - Extreme Left */}
+            <img 
+              src={beingHomeLogo}
+              alt="Being Home Logo" 
+              className="h-10 sm:h-12 md:h-15 w-auto object-contain max-w-[140px] sm:max-w-[180px] md:max-w-[220px]"
+              style={{ 
+                transform: 'scale(1.8, 1.4)',
+                transformOrigin: 'left center'
+              }}
+              onError={(e) => {
+                console.error('Logo failed to load from:', beingHomeLogo);
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+            {/* Info Button - Extreme Right */}
+            <InfoIconButton />
+          </div>
+          
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input 
@@ -316,13 +326,13 @@ const HomePage = () => {
         <Link to="/create-recipe">
           <Button 
             size="sm" 
-            className={`gap-2 py-3 bg-yellow-200 text-yellow-800 hover:bg-yellow-300 active:bg-yellow-400 shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 ease-in-out rounded-full touch-manipulation ${
+            className={`py-3 bg-yellow-200 text-yellow-800 hover:bg-yellow-300 active:bg-yellow-400 shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 ease-in-out rounded-full touch-manipulation ${
               isExpanded 
-                ? 'px-4 min-w-[140px] sm:min-w-[160px]' 
-                : 'w-14 h-14 p-0 min-w-0'
+                ? 'gap-2 px-4 min-w-[140px] sm:min-w-[160px] justify-start' 
+                : 'w-14 h-14 p-0 min-w-0 justify-center items-center'
             }`}
           >
-            <Plus className="w-5 h-5 flex-shrink-0" />
+            <Plus className={`w-5 h-5 flex-shrink-0 ${isExpanded ? '' : 'absolute'}`} />
             <span className={`transition-all duration-300 overflow-hidden whitespace-nowrap ${
               isExpanded ? 'opacity-100 max-w-[120px]' : 'opacity-0 max-w-0'
             }`}>
@@ -334,13 +344,13 @@ const HomePage = () => {
         {/* What to Cook Button */}
         <Button
           onClick={handleWhatToCook}
-          className={`gap-2 py-3 bg-primary text-primary-foreground font-semibold shadow-xl border-0 hover:scale-105 active:scale-95 transition-all duration-300 ease-in-out rounded-full touch-manipulation ${
+          className={`py-3 bg-primary text-primary-foreground font-semibold shadow-xl border-0 hover:scale-105 active:scale-95 transition-all duration-300 ease-in-out rounded-full touch-manipulation ${
             isExpanded 
-              ? 'px-4 min-w-[140px] sm:min-w-[160px]' 
-              : 'w-14 h-14 p-0 min-w-0'
+              ? 'gap-2 px-4 min-w-[140px] sm:min-w-[160px] justify-start' 
+              : 'w-14 h-14 p-0 min-w-0 justify-center items-center'
           }`}
         >
-          <ChefHat className="w-5 h-5 flex-shrink-0" />
+          <ChefHat className={`w-5 h-5 flex-shrink-0 ${isExpanded ? '' : 'absolute'}`} />
           <span className={`transition-all duration-300 overflow-hidden whitespace-nowrap ${
             isExpanded ? 'opacity-100 max-w-[120px]' : 'opacity-0 max-w-0'
           }`}>

@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import BottomNavigation from "@/components/BottomNavigation";
 import { Link } from "react-router-dom";
+import InfoIconButton from "../components/ui/InfoIconButton";
+import beingHomeLogo from "/beinghomelogo.jpeg";
 
 const KBankPage = () => {
   const foodCategories = [
@@ -133,6 +135,27 @@ const KBankPage = () => {
       
       <header className="bg-card shadow-card border-b border-border">
         <div className="px-4 py-4">
+          {/* Logo and Info Button Row */}
+          <div className="flex items-center justify-between mb-4">
+            {/* Being Home Logo - Extreme Left */}
+            <img 
+              src={beingHomeLogo}
+              alt="Being Home Logo" 
+              className="h-10 sm:h-12 md:h-15 w-auto object-contain max-w-[140px] sm:max-w-[180px] md:max-w-[220px]"
+              style={{ 
+                transform: 'scale(1.8, 1.4)',
+                transformOrigin: 'left center'
+              }}
+              onError={(e) => {
+                console.error('Logo failed to load from:', beingHomeLogo);
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+            {/* Info Button - Extreme Right */}
+            <InfoIconButton />
+          </div>
+          
+          <h1 className="text-xl font-semibold text-foreground mb-2">K-Bank</h1>
           <p className="text-muted-foreground text-sm">
             Explore different types of foods and their nutritional benefits
           </p>

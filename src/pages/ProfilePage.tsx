@@ -5,12 +5,35 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import BottomNavigation from "@/components/BottomNavigation";
+import InfoIconButton from "../components/ui/InfoIconButton";
+import beingHomeLogo from "/beinghomelogo.jpeg";
 
 export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-background pb-20 flex flex-col" style={{ position: "relative" }}>
       <header className="bg-card shadow-card border-b border-border w-full">
         <div className="px-4 py-4">
+          {/* Logo and Info Button Row */}
+          <div className="flex items-center justify-between mb-4">
+            {/* Being Home Logo - Extreme Left */}
+            <img 
+              src={beingHomeLogo}
+              alt="Being Home Logo" 
+              className="h-10 sm:h-12 md:h-15 w-auto object-contain max-w-[140px] sm:max-w-[180px] md:max-w-[220px]"
+              style={{ 
+                transform: 'scale(1.8, 1.4)',
+                transformOrigin: 'left center'
+              }}
+              onError={(e) => {
+                console.error('Logo failed to load from:', beingHomeLogo);
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+            {/* Info Button - Extreme Right */}
+            <InfoIconButton />
+          </div>
+          
+          <h1 className="text-xl font-semibold text-foreground">Profile</h1>
         </div>
       </header>
       <main className="flex flex-1 flex-col items-center justify-center w-full px-4 py-8">

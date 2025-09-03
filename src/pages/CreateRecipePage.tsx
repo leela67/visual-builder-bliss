@@ -10,6 +10,8 @@ import BottomNavigation from "@/components/BottomNavigation";
 import { Link, useNavigate } from "react-router-dom";
 import { RecipeAPI, type CreateRecipeRequest } from "@/api/recipes";
 import { toast } from "sonner";
+import InfoIconButton from "../components/ui/InfoIconButton";
+import beingHomeLogo from "/beinghomelogo.jpeg";
 
 // Development helper function to export localStorage recipes
 const exportRecipesToConsole = () => {
@@ -188,9 +190,29 @@ const CreateRecipePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background" style={{ position: "relative" }}>
-      <header className="fixed top-0 left-0 right-0 bg-card shadow-card border-b border-border z-50">
+    <div className="min-h-screen bg-background pb-20" style={{ position: "relative" }}>
+      <header className="bg-card shadow-card border-b border-border">
         <div className="px-4 py-4">
+          {/* Logo and Info Button Row */}
+          <div className="flex items-center justify-between mb-4">
+            {/* Being Home Logo - Extreme Left */}
+            <img 
+              src={beingHomeLogo}
+              alt="Being Home Logo" 
+              className="h-10 sm:h-12 md:h-15 w-auto object-contain max-w-[140px] sm:max-w-[180px] md:max-w-[220px]"
+              style={{ 
+                transform: 'scale(1.8, 1.4)',
+                transformOrigin: 'left center'
+              }}
+              onError={(e) => {
+                console.error('Logo failed to load from:', beingHomeLogo);
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+            {/* Info Button - Extreme Right */}
+            <InfoIconButton />
+          </div>
+          
           <div className="flex items-center gap-3">
             <Link to="/recipes">
               <Button variant="ghost" size="sm" className="p-2">
@@ -202,7 +224,7 @@ const CreateRecipePage = () => {
         </div>
       </header>
 
-      <main className="px-4 py-6 mt-20">
+      <main className="px-4 py-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="recipeName" className="text-foreground font-medium">Recipe name *</Label>
