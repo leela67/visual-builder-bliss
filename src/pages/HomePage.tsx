@@ -39,28 +39,33 @@ const HomePage = () => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        // Scrolling down
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        // Scrolling down - expand buttons
         setIsExpanded(true);
+        
+        // Clear existing timeout when actively scrolling down
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+        }
+        
+        // Set timeout to contract after 3 seconds of no scrolling
+        scrollTimeoutRef.current = setTimeout(() => {
+          setIsExpanded(false);
+        }, 3000);
       } else if (currentScrollY < lastScrollY) {
-        // Scrolling up
+        // Scrolling up - contract buttons immediately
         setIsExpanded(false);
+        
+        // Clear timeout when scrolling up
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+        }
       }
       
       setLastScrollY(currentScrollY);
-      
-      // Clear existing timeout
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-      
-      // Set timeout to contract after 2 seconds of no scrolling
-      scrollTimeoutRef.current = setTimeout(() => {
-        setIsExpanded(false);
-      }, 2000);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -130,7 +135,7 @@ const HomePage = () => {
           <img 
             src="/beinghomelogo.jpeg" 
             alt="Being Home Logo" 
-            className="h-10 w-auto"
+            className="h-8 sm:h-10 w-auto"
           />
           <InfoIconButton />
         </div>
@@ -212,22 +217,22 @@ const HomePage = () => {
                       {post.content}
                     </p>
                     
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <button className="flex items-center gap-1 hover:text-primary transition">
+                    <div className="flex items-center gap-2 sm:gap-4 text-xs text-muted-foreground flex-wrap">
+                      <button className="flex items-center gap-1 hover:text-primary transition touch-manipulation active:scale-95">
                         <span>❤️</span>
                         <span>{post.likes} likes</span>
                       </button>
-                      <button className="hover:text-primary transition">
+                      <button className="hover:text-primary transition touch-manipulation active:scale-95">
                         Comment
                       </button>
-                      <button className="hover:text-primary transition">
+                      <button className="hover:text-primary transition touch-manipulation active:scale-95">
                         Share
                       </button>
                     </div>
                   </div>
                   
                   {post.image && (
-                    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden flex-shrink-0">
                       <img
                         src={post.image}
                         alt="Social media post"
@@ -263,20 +268,20 @@ const HomePage = () => {
       </main>
 
       {/* Floating Buttons */}
-      <div className="fixed bottom-20 right-4 z-40 flex flex-col gap-3">
+      <div className="fixed bottom-20 right-2 sm:right-4 z-40 flex flex-col gap-3">
         {/* Create Recipe Button */}
         <Link to="/create-recipe">
           <Button 
             size="sm" 
-            className={`gap-2 py-3 bg-yellow-200 text-yellow-800 hover:bg-yellow-300 shadow-xl hover:scale-105 transition-all duration-300 ease-in-out rounded-full ${
+            className={`gap-2 py-3 bg-yellow-200 text-yellow-800 hover:bg-yellow-300 active:bg-yellow-400 shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 ease-in-out rounded-full touch-manipulation ${
               isExpanded 
-                ? 'px-4 min-w-[140px]' 
+                ? 'px-4 min-w-[140px] sm:min-w-[160px]' 
                 : 'w-14 h-14 p-0 min-w-0'
             }`}
           >
             <Plus className="w-5 h-5 flex-shrink-0" />
-            <span className={`transition-all duration-300 overflow-hidden ${
-              isExpanded ? 'opacity-100 max-w-[100px]' : 'opacity-0 max-w-0'
+            <span className={`transition-all duration-300 overflow-hidden whitespace-nowrap ${
+              isExpanded ? 'opacity-100 max-w-[120px]' : 'opacity-0 max-w-0'
             }`}>
               Create Recipe
             </span>
@@ -286,15 +291,15 @@ const HomePage = () => {
         {/* What to Cook Button */}
         <Button
           onClick={handleWhatToCook}
-          className={`gap-2 py-3 bg-primary text-primary-foreground font-semibold shadow-xl border-0 hover:scale-105 transition-all duration-300 ease-in-out rounded-full ${
+          className={`gap-2 py-3 bg-primary text-primary-foreground font-semibold shadow-xl border-0 hover:scale-105 active:scale-95 transition-all duration-300 ease-in-out rounded-full touch-manipulation ${
             isExpanded 
-              ? 'px-4 min-w-[140px]' 
+              ? 'px-4 min-w-[140px] sm:min-w-[160px]' 
               : 'w-14 h-14 p-0 min-w-0'
           }`}
         >
           <ChefHat className="w-5 h-5 flex-shrink-0" />
-          <span className={`transition-all duration-300 overflow-hidden ${
-            isExpanded ? 'opacity-100 max-w-[100px]' : 'opacity-0 max-w-0'
+          <span className={`transition-all duration-300 overflow-hidden whitespace-nowrap ${
+            isExpanded ? 'opacity-100 max-w-[120px]' : 'opacity-0 max-w-0'
           }`}>
             What to Cook
           </span>
