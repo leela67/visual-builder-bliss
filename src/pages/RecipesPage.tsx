@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import InfoIconButton from "../components/ui/InfoIconButton";
 import { Search, Filter, ArrowLeft, ChefHat, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,9 @@ import { Link } from "react-router-dom";
 const RecipesPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [isVegOnly, setIsVegOnly] = useState<boolean>(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   const categories = ["All", "Breakfast", "Lunch", "Dinner", "Dessert", "Snacks", "Fresh Pickles", "Juices"];
   
@@ -75,30 +78,47 @@ const RecipesPage = () => {
     return categoryMatch && vegMatch;
   });
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Scrolling down
+        setIsExpanded(true);
+      } else if (currentScrollY < lastScrollY) {
+        // Scrolling up
+        setIsExpanded(false);
+      }
+      
+      setLastScrollY(currentScrollY);
+      
+      // Clear existing timeout
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+      
+      // Set timeout to contract after 2 seconds of no scrolling
+      scrollTimeoutRef.current = setTimeout(() => {
+        setIsExpanded(false);
+      }, 2000);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [lastScrollY]);
+
   return (
     <div className="min-h-screen bg-background pt-20 pb-20" style={{ position: "relative" }}>
       {/* Fixed Top Action Bar */}
       <div className="fixed top-0 left-0 right-0 bg-card border-b border-border shadow-sm z-50">
-        <div className="flex items-center justify-center px-4 py-3 max-w-screen-xl mx-auto">
-          <div className="flex items-center gap-4">
-            <InfoIconButton />
-            <Link to="/create-recipe">
-              <Button 
-                size="sm" 
-                className="gap-2 py-3 bg-secondary text-secondary-foreground hover:bg-secondary/90"
-              >
-                <Plus className="w-4 h-4" />
-                Create Recipe
-              </Button>
-            </Link>
-            <Button 
-              size="sm" 
-              className="max-w-40 gap-2 py-3 bg-primary text-primary-foreground font-semibold shadow-lg border-0 hover:scale-105 transition-transform duration-200"
-            >
-              <ChefHat className="w-4 h-4" />
-              What to Cook
-            </Button>
-          </div>
+        <div className="flex items-center justify-end px-4 py-3 max-w-screen-xl mx-auto">
+          <InfoIconButton />
         </div>
       </div>
 
@@ -199,6 +219,44 @@ const RecipesPage = () => {
           </div>
         )}
       </main>
+
+      {/* Floating Buttons */}
+      <div className="fixed bottom-20 right-4 z-40 flex flex-col gap-3">
+        {/* Create Recipe Button */}
+        <Link to="/create-recipe">
+          <Button 
+            size="sm" 
+            className={`gap-2 py-3 bg-yellow-200 text-yellow-800 hover:bg-yellow-300 shadow-xl hover:scale-105 transition-all duration-300 ease-in-out rounded-full ${
+              isExpanded 
+                ? 'px-4 min-w-[140px]' 
+                : 'w-14 h-14 p-0 min-w-0'
+            }`}
+          >
+            <Plus className="w-5 h-5 flex-shrink-0" />
+            <span className={`transition-all duration-300 overflow-hidden ${
+              isExpanded ? 'opacity-100 max-w-[100px]' : 'opacity-0 max-w-0'
+            }`}>
+              Create Recipe
+            </span>
+          </Button>
+        </Link>
+        
+        {/* What to Cook Button */}
+        <Button
+          className={`gap-2 py-3 bg-primary text-primary-foreground font-semibold shadow-xl border-0 hover:scale-105 transition-all duration-300 ease-in-out rounded-full ${
+            isExpanded 
+              ? 'px-4 min-w-[140px]' 
+              : 'w-14 h-14 p-0 min-w-0'
+          }`}
+        >
+          <ChefHat className="w-5 h-5 flex-shrink-0" />
+          <span className={`transition-all duration-300 overflow-hidden ${
+            isExpanded ? 'opacity-100 max-w-[100px]' : 'opacity-0 max-w-0'
+          }`}>
+            What to Cook
+          </span>
+        </Button>
+      </div>
 
       {/* Fixed Bottom Navigation Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
