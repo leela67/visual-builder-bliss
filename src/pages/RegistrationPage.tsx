@@ -1,33 +1,39 @@
 import React, { useState } from "react";
 import InfoIconButton from "../components/ui/InfoIconButton";
+import CountryCodeSelector from "../components/ui/CountryCodeSelector";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Loader2, Plus, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import BottomNavigation from "@/components/BottomNavigation";
 import { AuthService } from "@/api/auth";
 import { toast } from "sonner";
 
+const AVAILABLE_INTERESTS = [
+  "Vegetarian", "Non-Vegetarian", "Vegan", "Gluten-Free", "Keto",
+  "Low-Carb", "High-Protein", "Dairy-Free", "Nut-Free", "Spicy Food",
+  "Sweet Dishes", "Healthy Eating", "Quick Meals", "Traditional Cuisine",
+  "International Cuisine", "Baking", "Grilling", "Breakfast", "Desserts"
+];
+
 export default function RegistrationPage() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
+  const [countryCode, setCountryCode] = useState("+91");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [interests, setInterests] = useState<string[]>([]);
-  const [newInterest, setNewInterest] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const addInterest = () => {
-    if (newInterest.trim() && !interests.includes(newInterest.trim())) {
-      setInterests([...interests, newInterest.trim()]);
-      setNewInterest("");
-    }
-  };
-
-  const removeInterest = (interest: string) => {
-    setInterests(interests.filter(i => i !== interest));
+  const toggleInterest = (interest: string) => {
+    setInterests(prev =>
+      prev.includes(interest)
+        ? prev.filter(i => i !== interest)
+        : [...prev, interest]
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,8 +57,9 @@ export default function RegistrationPage() {
     setIsLoading(true);
 
     try {
+      const fullPhoneNumber = `${countryCode}${phoneNumber.trim()}`;
       const response = await AuthService.register(
-        phoneNumber.trim(),
+        fullPhoneNumber,
         password,
         name.trim(),
         interests
@@ -109,15 +116,26 @@ export default function RegistrationPage() {
 
             <div className="space-y-2">
               <Label htmlFor="phoneNumber">Phone Number</Label>
-              <Input
-                id="phoneNumber"
-                type="tel"
-                placeholder="Enter your phone number (e.g., +1234567890)"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                required
-                disabled={isLoading}
-              />
+              <div className="flex gap-2">
+                <CountryCodeSelector
+                  value={countryCode}
+                  onChange={setCountryCode}
+                  className="flex-shrink-0"
+                />
+                <Input
+                  id="phoneNumber"
+                  type="tel"
+                  placeholder="Enter phone number"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  className="flex-1"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Enter your phone number without the country code
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -146,46 +164,29 @@ export default function RegistrationPage() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="interests">Interests (Optional)</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="interests"
-                  type="text"
-                  placeholder="Add an interest (e.g., Italian, Vegetarian)"
-                  value={newInterest}
-                  onChange={(e) => setNewInterest(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addInterest())}
-                  disabled={isLoading}
-                />
-                <Button
-                  type="button"
-                  onClick={addInterest}
-                  size="sm"
-                  disabled={isLoading || !newInterest.trim()}
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
+            <div className="space-y-3">
+              <Label>Food Interests (Optional)</Label>
+              <p className="text-sm text-muted-foreground">Select your food preferences:</p>
+              <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+                {AVAILABLE_INTERESTS.map((interest) => (
+                  <Badge
+                    key={interest}
+                    variant={interests.includes(interest) ? "default" : "secondary"}
+                    className={`cursor-pointer transition-colors ${
+                      interests.includes(interest)
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                        : "hover:bg-secondary/80"
+                    }`}
+                    onClick={() => toggleInterest(interest)}
+                  >
+                    {interest}
+                  </Badge>
+                ))}
               </div>
               {interests.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {interests.map((interest, index) => (
-                    <div
-                      key={index}
-                      className="bg-primary/10 text-primary px-2 py-1 rounded-md text-sm flex items-center gap-1"
-                    >
-                      {interest}
-                      <button
-                        type="button"
-                        onClick={() => removeInterest(interest)}
-                        className="text-primary hover:text-primary/80"
-                        disabled={isLoading}
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                <p className="text-xs text-muted-foreground">
+                  Selected: {interests.join(", ")}
+                </p>
               )}
             </div>
 

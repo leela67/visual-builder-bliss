@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import InfoIconButton from "../components/ui/InfoIconButton";
-import { Search, Filter, ArrowLeft, ChefHat, Plus, Loader2 } from "lucide-react";
+import { Search, ArrowLeft, ChefHat, Plus, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,34 +33,18 @@ const RecipesPage = () => {
   const fetchRecipes = async () => {
     try {
       setIsLoading(true);
-      let response;
 
-      if (searchQuery.trim()) {
-        // Use search API
-        response = await RecipeService.searchRecipes({
-          search: searchQuery.trim(),
-          meal_type: selectedCategory !== "All" ? selectedCategory as RecipeCategory : undefined,
-          veg: isVegOnly || undefined,
-          page: 1,
-          limit: 50
-        });
-      } else {
-        // Use regular recipes API
-        response = await RecipeService.getRecipes(1, 50);
-      }
+      // Always use search API with proper parameters
+      const response = await RecipeService.searchRecipes({
+        search: searchQuery.trim() || undefined,
+        meal_type: selectedCategory !== "All" ? selectedCategory as RecipeCategory : undefined,
+        veg: isVegOnly || undefined,
+        page: 1,
+        limit: 20
+      });
 
       if (response.success && response.data) {
-        let filteredData = response.data;
-
-        // Apply client-side filtering if not using search API
-        if (!searchQuery.trim()) {
-          filteredData = response.data.filter(recipe => {
-            const categoryMatch = selectedCategory === "All" || recipe.name.toLowerCase().includes(selectedCategory.toLowerCase());
-            return categoryMatch;
-          });
-        }
-
-        setRecipes(filteredData);
+        setRecipes(response.data);
       } else {
         toast.error("Failed to load recipes");
         setRecipes([]);
@@ -266,14 +250,10 @@ const RecipesPage = () => {
       </header>
 
       <main className="px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6">
           <p className="text-muted-foreground">
             {isLoading ? 'Loading...' : `${recipes.length} recipe${recipes.length !== 1 ? 's' : ''} found`}
           </p>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Filter className="w-4 h-4" />
-            Filter
-          </Button>
         </div>
 
         {isLoading ? (

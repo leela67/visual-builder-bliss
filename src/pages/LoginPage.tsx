@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import InfoIconButton from "../components/ui/InfoIconButton";
+import CountryCodeSelector from "../components/ui/CountryCodeSelector";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +12,7 @@ import { toast } from "sonner";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [countryCode, setCountryCode] = useState("+91");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +28,8 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const response = await AuthService.login(phoneNumber.trim(), password);
+      const fullPhoneNumber = `${countryCode}${phoneNumber.trim()}`;
+      const response = await AuthService.login(fullPhoneNumber, password);
 
       if (response.success) {
         toast.success("Login successful!");
@@ -64,15 +67,26 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="phoneNumber">Phone Number</Label>
-              <Input
-                id="phoneNumber"
-                type="tel"
-                placeholder="Enter your phone number (e.g., +1234567890)"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                required
-                disabled={isLoading}
-              />
+              <div className="flex gap-2">
+                <CountryCodeSelector
+                  value={countryCode}
+                  onChange={setCountryCode}
+                  className="flex-shrink-0"
+                />
+                <Input
+                  id="phoneNumber"
+                  type="tel"
+                  placeholder="Enter phone number"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  className="flex-1"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Enter your phone number without the country code
+              </p>
             </div>
 
             <div className="space-y-2">
