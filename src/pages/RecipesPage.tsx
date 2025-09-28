@@ -1,83 +1,82 @@
 import { useState, useEffect, useRef } from "react";
 import InfoIconButton from "../components/ui/InfoIconButton";
-import { Search, Filter, ArrowLeft, ChefHat, Plus } from "lucide-react";
+import { Search, Filter, ArrowLeft, ChefHat, Plus, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import BottomNavigation from "@/components/BottomNavigation";
 import RecipeCard from "@/components/RecipeCard";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { RecipeService, type RecipeListItem } from "@/api/recipeService";
+import { RECIPE_CATEGORIES, type RecipeCategory } from "@/api/config";
+import { toast } from "sonner";
 import beingHomeLogo from "/beinghomelogo.jpeg";
 
 const RecipesPage = () => {
+  const [searchParams] = useSearchParams();
+  const [recipes, setRecipes] = useState<RecipeListItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [isVegOnly, setIsVegOnly] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [isExpanded, setIsExpanded] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
-  const categories = ["All", "Breakfast", "Lunch", "Dinner", "Dessert", "Snacks", "Fresh Pickles", "Juices"];
-  
-  const recipes = [
-    {
-      id: "1",
-      title: "Pasta with Vegetables",
-      image: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400&h=300&fit=crop",
-      rating: 5,
-      category: "Dinner",
-      servings: 4,
-      isVeg: true,
-      ingredients: [
-        { name: "pasta", quantity: 200, unit: "g" },
-        { name: "zucchini", quantity: 1, unit: "piece" },
-        { name: "carrot", quantity: 1, unit: "piece" },
-        { name: "tomatoes", quantity: 2, unit: "pieces" },
-        { name: "olive oil", quantity: 2, unit: "tbsp" },
-        { name: "salt and pepper", quantity: 0, unit: "to taste" },
-        { name: "fresh herbs (basil, parsley)", quantity: 0, unit: "to taste" }
-      ]
-    },
-    {
-      id: "2", 
-      title: "Healthy Breakfast Bowl",
-      image: "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?w=400&h=300&fit=crop",
-      rating: 4,
-      category: "Breakfast",
-      servings: 2,
-      isVeg: true,
-      ingredients: [
-        { name: "oats", quantity: 100, unit: "g" },
-        { name: "banana", quantity: 1, unit: "piece" },
-        { name: "berries", quantity: 150, unit: "g" },
-        { name: "yogurt", quantity: 200, unit: "ml" },
-        { name: "honey", quantity: 2, unit: "tbsp" },
-        { name: "nuts", quantity: 30, unit: "g" }
-      ]
-    },
-    {
-      id: "3", 
-      title: "Chicken Curry",
-      image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&h=300&fit=crop",
-      rating: 5,
-      category: "Dinner",
-      servings: 4,
-      isVeg: false,
-      ingredients: [
-        { name: "chicken", quantity: 500, unit: "g" },
-        { name: "onions", quantity: 2, unit: "pieces" },
-        { name: "tomatoes", quantity: 3, unit: "pieces" },
-        { name: "ginger-garlic paste", quantity: 2, unit: "tbsp" },
-        { name: "spices", quantity: 0, unit: "to taste" },
-        { name: "oil", quantity: 3, unit: "tbsp" }
-      ]
-    }
-  ];
 
-  const filteredRecipes = recipes.filter(recipe => {
-    const categoryMatch = selectedCategory === "All" || recipe.category === selectedCategory;
-    const vegMatch = !isVegOnly || recipe.isVeg;
-    return categoryMatch && vegMatch;
-  });
+  const categories = ["All", ...RECIPE_CATEGORIES];
+  
+  // Fetch recipes based on current filters
+  useEffect(() => {
+    fetchRecipes();
+  }, [selectedCategory, isVegOnly, searchQuery]);
+
+  const fetchRecipes = async () => {
+    try {
+      setIsLoading(true);
+      let response;
+
+      if (searchQuery.trim()) {
+        // Use search API
+        response = await RecipeService.searchRecipes({
+          search: searchQuery.trim(),
+          meal_type: selectedCategory !== "All" ? selectedCategory as RecipeCategory : undefined,
+          veg: isVegOnly || undefined,
+          page: 1,
+          limit: 50
+        });
+      } else {
+        // Use regular recipes API
+        response = await RecipeService.getRecipes(1, 50);
+      }
+
+      if (response.success && response.data) {
+        let filteredData = response.data;
+
+        // Apply client-side filtering if not using search API
+        if (!searchQuery.trim()) {
+          filteredData = response.data.filter(recipe => {
+            const categoryMatch = selectedCategory === "All" || recipe.name.toLowerCase().includes(selectedCategory.toLowerCase());
+            return categoryMatch;
+          });
+        }
+
+        setRecipes(filteredData);
+      } else {
+        toast.error("Failed to load recipes");
+        setRecipes([]);
+      }
+    } catch (error) {
+      console.error('Error fetching recipes:', error);
+      toast.error("Failed to load recipes");
+      setRecipes([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSearch = () => {
+    fetchRecipes();
+  };
 
   useEffect(() => {
     let ticking = false;
@@ -190,8 +189,15 @@ const RecipesPage = () => {
           <div className="flex items-center gap-3 mb-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input 
-                placeholder="Search recipes..." 
+              <Input
+                placeholder="Search recipes..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearch();
+                  }
+                }}
                 className="pl-10 pr-4 bg-background border-input"
               />
             </div>
@@ -262,24 +268,44 @@ const RecipesPage = () => {
       <main className="px-4 py-6">
         <div className="flex items-center justify-between mb-6">
           <p className="text-muted-foreground">
-            {filteredRecipes.length} recipe{filteredRecipes.length !== 1 ? 's' : ''} found
+            {isLoading ? 'Loading...' : `${recipes.length} recipe${recipes.length !== 1 ? 's' : ''} found`}
           </p>
           <Button variant="outline" size="sm" className="gap-2">
             <Filter className="w-4 h-4" />
             Filter
           </Button>
         </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredRecipes.map((recipe) => (
-            <RecipeCard key={recipe.id} {...recipe} />
-          ))}
-        </div>
 
-        {filteredRecipes.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No recipes found for this category.</p>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <span className="ml-2 text-muted-foreground">Loading recipes...</span>
           </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {recipes.map((recipe) => (
+                <RecipeCard
+                  key={recipe.recipe_id}
+                  recipe_id={recipe.recipe_id}
+                  name={recipe.name}
+                  image_url={recipe.image_url}
+                  rating={recipe.rating}
+                  cook_time={recipe.cook_time}
+                  views={recipe.views}
+                  is_popular={recipe.is_popular}
+                />
+              ))}
+            </div>
+
+            {recipes.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">
+                  {searchQuery ? `No recipes found for "${searchQuery}"` : "No recipes found for this category."}
+                </p>
+              </div>
+            )}
+          </>
         )}
       </main>
 

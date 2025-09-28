@@ -1,17 +1,78 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { FavoritesService } from "@/api/favoritesService";
+import { AuthService } from "@/api/auth";
+import { toast } from "sonner";
 
-export default function FavoriteHeartButton() {
+interface FavoriteHeartButtonProps {
+  recipeId: string;
+}
+
+export default function FavoriteHeartButton({ recipeId }: FavoriteHeartButtonProps) {
   const [favorited, setFavorited] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const isAuthenticated = AuthService.isAuthenticated();
+
+  // Check favorite status on mount
+  useEffect(() => {
+    if (isAuthenticated && recipeId) {
+      checkFavoriteStatus();
+    }
+  }, [recipeId, isAuthenticated]);
+
+  const checkFavoriteStatus = async () => {
+    try {
+      const numericRecipeId = parseInt(recipeId);
+      if (isNaN(numericRecipeId)) return;
+
+      const response = await FavoritesService.checkFavoriteStatus(numericRecipeId);
+      if (response.success && response.data) {
+        setFavorited(response.data.is_favorite);
+      }
+    } catch (error) {
+      console.error('Error checking favorite status:', error);
+    }
+  };
+
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error("Please login to add favorites");
+      return;
+    }
+
+    const numericRecipeId = parseInt(recipeId);
+    if (isNaN(numericRecipeId)) {
+      toast.error("Invalid recipe ID");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await FavoritesService.toggleFavorite(numericRecipeId);
+
+      if (response.success) {
+        setFavorited(response.isFavorite);
+        toast.success(response.isFavorite ? "Added to favorites" : "Removed from favorites");
+      } else {
+        toast.error(response.message || "Failed to update favorites");
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <button
       type="button"
       aria-label="Favorite"
-      onClick={e => {
-        e.preventDefault();
-        e.stopPropagation();
-        setFavorited(f => !f);
-      }}
-      className="absolute top-2 right-2 z-10"
+      onClick={handleToggleFavorite}
+      disabled={isLoading}
+      className="absolute top-2 right-2 z-10 disabled:opacity-50"
       style={{ background: 'transparent', border: 'none', padding: 0 }}
     >
       <svg

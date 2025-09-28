@@ -1,21 +1,41 @@
-import { ArrowLeft, Heart } from "lucide-react";
+import { Heart, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BottomNavigation from "@/components/BottomNavigation";
 import RecipeCard from "@/components/RecipeCard";
 import { Link } from "react-router-dom";
 import InfoIconButton from "../components/ui/InfoIconButton";
 import beingHomeLogo from "/beinghomelogo.jpeg";
+import { useState, useEffect } from "react";
+import { FavoritesService, type FavoriteItem } from "@/api/favoritesService";
+import { toast } from "sonner";
 
 const FavoritesPage = () => {
-  const favoriteRecipes = [
-    {
-      id: "1",
-      title: "Pasta with Vegetables",
-      image: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400&h=300&fit=crop",
-      rating: 5,
-      category: "Dinner"
+  const [favoriteRecipes, setFavoriteRecipes] = useState<FavoriteItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchFavorites();
+  }, []);
+
+  const fetchFavorites = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await FavoritesService.getFavorites();
+
+      if (response.success && response.data) {
+        setFavoriteRecipes(response.data);
+      } else {
+        setError(response.message || "Failed to load favorites");
+      }
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+      setError("Failed to load favorites. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-  ];
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20" style={{ position: "relative" }}>
@@ -46,10 +66,33 @@ const FavoritesPage = () => {
       </header>
 
       <main className="px-4 py-6">
-        {favoriteRecipes.length > 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <span className="ml-2 text-muted-foreground">Loading favorites...</span>
+          </div>
+        ) : error ? (
+          <div className="text-center py-16">
+            <Heart className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-foreground mb-2">Error loading favorites</h2>
+            <p className="text-muted-foreground mb-6">{error}</p>
+            <Button onClick={fetchFavorites} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              Try Again
+            </Button>
+          </div>
+        ) : favoriteRecipes.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {favoriteRecipes.map((recipe) => (
-              <RecipeCard key={recipe.id} {...recipe} />
+            {favoriteRecipes.map((favoriteItem) => (
+              <RecipeCard
+                key={favoriteItem.recipe_id}
+                recipe_id={favoriteItem.recipe_id}
+                name={favoriteItem.recipe.name}
+                image_url={favoriteItem.recipe.image_url}
+                rating={favoriteItem.recipe.rating}
+                cook_time={favoriteItem.recipe.cook_time}
+                views={favoriteItem.recipe.views}
+                is_popular={favoriteItem.recipe.is_popular}
+              />
             ))}
           </div>
         ) : (

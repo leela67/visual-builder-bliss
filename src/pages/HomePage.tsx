@@ -7,23 +7,35 @@ import { Link, useNavigate } from "react-router-dom";
 import BottomNavigation from "@/components/BottomNavigation";
 import RecipeCard from "@/components/RecipeCard";
 import { useState, useEffect, useRef } from "react";
-import { RecipeAPI } from "@/api/recipes";
-import { type IRecipe } from "@/models";
+import { RecipeService, type RecipeListItem } from "@/api/recipeService";
 import beingHomeLogo from "/beinghomelogo.jpeg";
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const [featuredRecipes, setFeaturedRecipes] = useState<IRecipe[]>([]);
+  const [featuredRecipes, setFeaturedRecipes] = useState<RecipeListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const fetchFeaturedRecipes = async () => {
       try {
-        const recipes = await RecipeAPI.getFeaturedRecipes(6);
-        setFeaturedRecipes(recipes);
+        // Try to get popular recipes first, fallback to regular recipes
+        let response;
+        try {
+          response = await RecipeService.getPopularRecipes(1, 6);
+        } catch (error) {
+          console.warn('Popular recipes not available, fetching regular recipes');
+          response = await RecipeService.getRecipes(1, 6);
+        }
+
+        if (response.success && response.data) {
+          setFeaturedRecipes(response.data);
+        } else {
+          setFeaturedRecipes([]);
+        }
       } catch (error) {
         console.error('Error fetching featured recipes:', error);
         // Fallback to empty array
@@ -35,6 +47,12 @@ const HomePage = () => {
 
     fetchFeaturedRecipes();
   }, []);
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      navigate(`/recipes?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   useEffect(() => {
     let ticking = false;
@@ -198,8 +216,15 @@ const HomePage = () => {
           
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input 
-              placeholder="Search recipes..." 
+            <Input
+              placeholder="Search recipes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch();
+                }
+              }}
               className="pl-10 bg-background border-input"
             />
           </div>
@@ -234,7 +259,16 @@ const HomePage = () => {
               ))
             ) : featuredRecipes.length > 0 ? (
               featuredRecipes.map((recipe) => (
-                <RecipeCard key={recipe._id} id={recipe._id!} title={recipe.title} image={recipe.image} rating={recipe.rating} category={recipe.category} />
+                <RecipeCard
+                  key={recipe.recipe_id}
+                  recipe_id={recipe.recipe_id}
+                  name={recipe.name}
+                  image_url={recipe.image_url}
+                  rating={recipe.rating}
+                  cook_time={recipe.cook_time}
+                  views={recipe.views}
+                  is_popular={recipe.is_popular}
+                />
               ))
             ) : (
               <div className="col-span-full text-center py-8 text-muted-foreground">

@@ -14,6 +14,7 @@ import CreateRecipePage from "./pages/CreateRecipePage";
 import KBankPage from "./pages/KBankPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -27,12 +28,24 @@ const App = () => (
           <Route path="/" element={<HomePage />} />
           <Route path="/recipes" element={<RecipesPage />} />
           <Route path="/recipes/:id" element={<RecipeDetailPage />} />
-          <Route path="/create-recipe" element={<CreateRecipePage />} />
+          <Route path="/create-recipe" element={
+            <ProtectedRoute>
+              <CreateRecipePage />
+            </ProtectedRoute>
+          } />
           <Route path="/k-bank" element={<KBankPage />} />
-          <Route path="/favorites" element={<FavoritesPage />} />
+          <Route path="/favorites" element={
+            <ProtectedRoute>
+              <FavoritesPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          } />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegistrationPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
           <Route path="/info" element={<InfoPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

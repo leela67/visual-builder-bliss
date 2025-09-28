@@ -8,7 +8,8 @@ import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import BottomNavigation from "@/components/BottomNavigation";
 import { Link, useNavigate } from "react-router-dom";
-import { RecipeAPI, type CreateRecipeRequest } from "@/api/recipes";
+import { RecipeService, type CreateRecipeRequest, type Ingredient, type Instruction } from "@/api/recipeService";
+import { RECIPE_CATEGORIES, DIFFICULTY_LEVELS, type RecipeCategory, type DifficultyLevel } from "@/api/config";
 import { toast } from "sonner";
 import InfoIconButton from "../components/ui/InfoIconButton";
 import beingHomeLogo from "/beinghomelogo.jpeg";
@@ -36,23 +37,23 @@ const CreateRecipePage = () => {
   
   // Form state
   const [formData, setFormData] = useState({
-    title: "",
-    image: "",
-    category: "",
-    cookTime: "",
+    name: "",
+    image_url: "",
+    category: "" as RecipeCategory | "",
+    cook_time: 0,
     servings: 1,
     calories: 0,
-    videoUrl: "",
-    difficulty: "Medium" as "Easy" | "Medium" | "Hard",
+    youtube_url: "",
+    difficulty: "Medium" as DifficultyLevel,
     cuisine: "",
     tags: ""
   });
-  
-  const [ingredients, setIngredients] = useState([""]);
-  const [instructions, setInstructions] = useState([""]);
+
+  const [ingredients, setIngredients] = useState<Ingredient[]>([{ name: "", quantity: "", unit: "" }]);
+  const [instructions, setInstructions] = useState<Instruction[]>([{ step: 1, description: "" }]);
 
   const addIngredient = () => {
-    setIngredients([...ingredients, ""]);
+    setIngredients([...ingredients, { name: "", quantity: "", unit: "" }]);
   };
 
   const removeIngredient = (index: number) => {
@@ -62,24 +63,28 @@ const CreateRecipePage = () => {
   };
 
   const addInstruction = () => {
-    setInstructions([...instructions, ""]);
+    const newStep = instructions.length + 1;
+    setInstructions([...instructions, { step: newStep, description: "" }]);
   };
 
   const removeInstruction = (index: number) => {
     if (instructions.length > 1) {
-      setInstructions(instructions.filter((_, i) => i !== index));
+      const updated = instructions.filter((_, i) => i !== index);
+      // Renumber steps
+      const renumbered = updated.map((inst, i) => ({ ...inst, step: i + 1 }));
+      setInstructions(renumbered);
     }
   };
 
-  const updateIngredient = (index: number, value: string) => {
+  const updateIngredient = (index: number, field: keyof Ingredient, value: string) => {
     const updated = [...ingredients];
-    updated[index] = value;
+    updated[index] = { ...updated[index], [field]: value };
     setIngredients(updated);
   };
 
   const updateInstruction = (index: number, value: string) => {
     const updated = [...instructions];
-    updated[index] = value;
+    updated[index] = { ...updated[index], description: value };
     setInstructions(updated);
   };
 
@@ -129,31 +134,31 @@ const CreateRecipePage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation
-    if (!formData.title.trim()) {
-      toast.error("Please enter a recipe title");
+    if (!formData.name.trim()) {
+      toast.error("Please enter a recipe name");
       return;
     }
-    
+
     if (!formData.category) {
       toast.error("Please select a category");
       return;
     }
-    
-    if (!formData.cookTime.trim()) {
-      toast.error("Please enter cook time");
+
+    if (formData.cook_time <= 0) {
+      toast.error("Please enter a valid cook time");
       return;
     }
 
-    const filteredIngredients = ingredients.filter(ing => ing.trim());
-    const filteredInstructions = instructions.filter(inst => inst.trim());
-    
+    const filteredIngredients = ingredients.filter(ing => ing.name.trim() && ing.quantity.trim());
+    const filteredInstructions = instructions.filter(inst => inst.description.trim());
+
     if (filteredIngredients.length === 0) {
-      toast.error("Please add at least one ingredient");
+      toast.error("Please add at least one ingredient with name and quantity");
       return;
     }
-    
+
     if (filteredInstructions.length === 0) {
       toast.error("Please add at least one instruction");
       return;
@@ -163,24 +168,28 @@ const CreateRecipePage = () => {
 
     try {
       const recipeData: CreateRecipeRequest = {
-        title: formData.title.trim(),
-        image: formData.image.trim() || undefined,
+        name: formData.name.trim(),
         category: formData.category,
-        cookTime: formData.cookTime.trim(),
+        image_url: formData.image_url.trim() || undefined,
+        youtube_url: formData.youtube_url.trim() || undefined,
+        cook_time: formData.cook_time,
         servings: formData.servings,
-        calories: formData.calories,
-        ingredients: filteredIngredients,
-        instructions: filteredInstructions,
-        videoUrl: formData.videoUrl.trim() || undefined,
         difficulty: formData.difficulty,
-        cuisine: formData.cuisine.trim() || undefined,
-        tags: formData.tags.trim() ? formData.tags.split(',').map(tag => tag.trim()) : undefined
+        cuisine: formData.cuisine.trim() || "Other",
+        calories: formData.calories,
+        tags: formData.tags.trim() ? formData.tags.split(',').map(tag => tag.trim()) : [],
+        ingredients: filteredIngredients,
+        instructions: filteredInstructions
       };
 
-      const newRecipe = await RecipeAPI.createRecipe(recipeData);
-      
-      toast.success("Recipe created successfully!");
-      navigate(`/recipes/${newRecipe._id}`);
+      const response = await RecipeService.createRecipe(recipeData);
+
+      if (response.success && response.data) {
+        toast.success("Recipe created successfully!");
+        navigate(`/recipes/${response.data.recipe_id}`);
+      } else {
+        toast.error(response.message || "Failed to create recipe");
+      }
     } catch (error) {
       console.error('Error creating recipe:', error);
       toast.error("Failed to create recipe. Please try again.");
@@ -228,11 +237,11 @@ const CreateRecipePage = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="recipeName" className="text-foreground font-medium">Recipe name *</Label>
-            <Input 
+            <Input
               id="recipeName"
               placeholder="Enter recipe name"
-              value={formData.title}
-              onChange={(e) => updateFormData('title', e.target.value)}
+              value={formData.name}
+              onChange={(e) => updateFormData('name', e.target.value)}
               className="bg-card border-input"
               required
             />
@@ -240,28 +249,25 @@ const CreateRecipePage = () => {
 
           <div className="space-y-2">
             <Label htmlFor="category" className="text-foreground font-medium">Category *</Label>
-            <Select value={formData.category} onValueChange={(value) => updateFormData('category', value)}>
+            <Select value={formData.category} onValueChange={(value) => updateFormData('category', value as RecipeCategory)}>
               <SelectTrigger className="bg-card border-input">
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Breakfast">Breakfast</SelectItem>
-                <SelectItem value="Lunch">Lunch</SelectItem>
-                <SelectItem value="Dinner">Dinner</SelectItem>
-                <SelectItem value="Snack">Snack</SelectItem>
-                <SelectItem value="Dessert">Dessert</SelectItem>
-                <SelectItem value="Beverage">Beverage</SelectItem>
+                {RECIPE_CATEGORIES.map((category) => (
+                  <SelectItem key={category} value={category}>{category}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="imageUrl" className="text-foreground font-medium">Image URL</Label>
-            <Input 
+            <Input
               id="imageUrl"
               placeholder="https://example.com/image.jpg"
-              value={formData.image}
-              onChange={(e) => updateFormData('image', e.target.value)}
+              value={formData.image_url}
+              onChange={(e) => updateFormData('image_url', e.target.value)}
               className="bg-card border-input"
             />
             <p className="text-xs text-muted-foreground">Paste an image URL or leave empty for default image</p>
@@ -271,11 +277,11 @@ const CreateRecipePage = () => {
             <Label htmlFor="videoUrl" className="text-foreground font-medium">YouTube video link</Label>
             <div className="relative">
               <Youtube className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input 
+              <Input
                 id="videoUrl"
                 placeholder="https://youtube.com/watch?v=..."
-                value={formData.videoUrl}
-                onChange={(e) => updateFormData('videoUrl', e.target.value)}
+                value={formData.youtube_url}
+                onChange={(e) => updateFormData('youtube_url', e.target.value)}
                 className="pl-10 bg-card border-input"
               />
             </div>
@@ -283,19 +289,21 @@ const CreateRecipePage = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="cookTime" className="text-foreground font-medium">Cook Time *</Label>
-              <Input 
+              <Label htmlFor="cookTime" className="text-foreground font-medium">Cook Time (minutes) *</Label>
+              <Input
                 id="cookTime"
-                placeholder="25 min"
-                value={formData.cookTime}
-                onChange={(e) => updateFormData('cookTime', e.target.value)}
+                placeholder="25"
+                type="number"
+                min="1"
+                value={formData.cook_time || ''}
+                onChange={(e) => updateFormData('cook_time', parseInt(e.target.value) || 0)}
                 className="bg-card border-input"
                 required
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="servings" className="text-foreground font-medium">Servings *</Label>
-              <Input 
+              <Input
                 id="servings"
                 placeholder="4"
                 type="number"
@@ -311,20 +319,20 @@ const CreateRecipePage = () => {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="difficulty" className="text-foreground font-medium">Difficulty</Label>
-              <Select value={formData.difficulty} onValueChange={(value) => updateFormData('difficulty', value)}>
+              <Select value={formData.difficulty} onValueChange={(value) => updateFormData('difficulty', value as DifficultyLevel)}>
                 <SelectTrigger className="bg-card border-input">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Easy">Easy</SelectItem>
-                  <SelectItem value="Medium">Medium</SelectItem>
-                  <SelectItem value="Hard">Hard</SelectItem>
+                  {DIFFICULTY_LEVELS.map((level) => (
+                    <SelectItem key={level} value={level}>{level}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="cuisine" className="text-foreground font-medium">Cuisine</Label>
-              <Input 
+              <Input
                 id="cuisine"
                 placeholder="Italian, Asian, etc."
                 value={formData.cuisine}
@@ -380,15 +388,27 @@ const CreateRecipePage = () => {
               {ingredients.map((ingredient, index) => (
                 <div key={index} className="flex gap-2">
                   <Input
-                    placeholder={`2 cups flour, 1 tsp salt, etc.`}
-                    value={ingredient}
-                    onChange={(e) => updateIngredient(index, e.target.value)}
+                    placeholder="Ingredient name"
+                    value={ingredient.name}
+                    onChange={(e) => updateIngredient(index, 'name', e.target.value)}
                     className="bg-card border-input flex-1"
                   />
+                  <Input
+                    placeholder="Qty"
+                    value={ingredient.quantity}
+                    onChange={(e) => updateIngredient(index, 'quantity', e.target.value)}
+                    className="bg-card border-input w-20"
+                  />
+                  <Input
+                    placeholder="Unit"
+                    value={ingredient.unit}
+                    onChange={(e) => updateIngredient(index, 'unit', e.target.value)}
+                    className="bg-card border-input w-20"
+                  />
                   {ingredients.length > 1 && (
-                    <Button 
+                    <Button
                       type="button"
-                      variant="outline" 
+                      variant="outline"
                       size="sm"
                       onClick={() => removeIngredient(index)}
                       className="px-2"
@@ -418,17 +438,22 @@ const CreateRecipePage = () => {
             <div className="space-y-3">
               {instructions.map((instruction, index) => (
                 <div key={index} className="flex gap-2">
-                  <Textarea
-                    placeholder={`Step ${index + 1}: Describe what to do...`}
-                    value={instruction}
-                    onChange={(e) => updateInstruction(index, e.target.value)}
-                    className="bg-card border-input flex-1"
-                    rows={3}
-                  />
+                  <div className="flex items-start gap-2 flex-1">
+                    <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center text-sm font-semibold mt-1">
+                      {instruction.step}
+                    </div>
+                    <Textarea
+                      placeholder={`Describe step ${instruction.step}...`}
+                      value={instruction.description}
+                      onChange={(e) => updateInstruction(index, e.target.value)}
+                      className="bg-card border-input flex-1"
+                      rows={3}
+                    />
+                  </div>
                   {instructions.length > 1 && (
-                    <Button 
+                    <Button
                       type="button"
-                      variant="outline" 
+                      variant="outline"
                       size="sm"
                       onClick={() => removeInstruction(index)}
                       className="px-2 self-start mt-1"
