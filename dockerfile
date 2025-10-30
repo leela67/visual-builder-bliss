@@ -14,37 +14,42 @@ RUN npm ci
 COPY . .
 
 # Build the Vite application for production
-# This creates optimized static files in the docs/ directory (configured for GitHub Pages)
+# This creates optimized static files in the dist/ directory
 RUN npm run build
 
 # Step 2: Serve static files with nginx
 FROM nginx:alpine
 
 # Copy the built frontend from build stage to nginx html directory
-# Note: Vite builds to 'docs' directory (configured for GitHub Pages)
-COPY --from=build /app/docs /usr/share/nginx/html
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy custom nginx configuration if needed
-# This ensures proper routing for React Router (SPA)
+# Create custom nginx configuration for React Router (SPA)
+# This ensures proper routing and serves index.html for all routes
 RUN echo 'server { \
-    listen 80; \
+    listen 3000; \
     server_name localhost; \
     root /usr/share/nginx/html; \
     index index.html; \
     location / { \
         try_files $uri $uri/ /index.html; \
     } \
-    # Enable gzip compression \
+    # Enable gzip compression for better performance \
     gzip on; \
-    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript; \
+    gzip_vary on; \
+    gzip_min_length 1024; \
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript image/svg+xml; \
+    # Security headers \
+    add_header X-Frame-Options "SAMEORIGIN" always; \
+    add_header X-Content-Type-Options "nosniff" always; \
+    add_header X-XSS-Protection "1; mode=block" always; \
 }' > /etc/nginx/conf.d/default.conf
 
-# Expose port 80 for HTTP traffic
-EXPOSE 80
+# Expose port 3000 for HTTP traffic
+EXPOSE 3000
 
 # Health check to ensure nginx is running
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost/ || exit 1
+  CMD wget --quiet --tries=1 --spider http://localhost:3000/ || exit 1
 
 # Start nginx in the foreground
 CMD ["nginx", "-g", "daemon off;"]
