@@ -5,7 +5,8 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: "/visual-builder-bliss/",
+  // Use root path for Docker deployment, GitHub Pages path for production
+  base: mode === 'production' ? "/" : "/visual-builder-bliss/",
   build: {
     outDir: "docs",
     rollupOptions: {

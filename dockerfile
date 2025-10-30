@@ -17,41 +17,34 @@ COPY . .
 # This creates optimized static files in the docs/ directory (configured for GitHub Pages)
 RUN npm run build
 
-# Step 2: Create production image with Node.js for Express server
-FROM node:18-alpine
+# Step 2: Serve static files with nginx
+FROM nginx:alpine
 
-# Set the working directory
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install only production dependencies
-RUN npm ci --only=production
-
-# Copy the built frontend from build stage
+# Copy the built frontend from build stage to nginx html directory
 # Note: Vite builds to 'docs' directory (configured for GitHub Pages)
-COPY --from=build /app/docs ./docs
+COPY --from=build /app/docs /usr/share/nginx/html
 
-# Copy server file
-COPY server.js ./
+# Copy custom nginx configuration if needed
+# This ensures proper routing for React Router (SPA)
+RUN echo 'server { \
+    listen 80; \
+    server_name localhost; \
+    root /usr/share/nginx/html; \
+    index index.html; \
+    location / { \
+        try_files $uri $uri/ /index.html; \
+    } \
+    # Enable gzip compression \
+    gzip on; \
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript; \
+}' > /etc/nginx/conf.d/default.conf
 
-# Copy source files (needed for database modules and TypeScript files)
-COPY src ./src
+# Expose port 80 for HTTP traffic
+EXPOSE 80
 
-# Copy TypeScript configuration files
-COPY tsconfig*.json ./
-
-# Copy any other necessary files (env, etc.)
-COPY .env* ./
-
-# Expose the port that the Express server will run on
-# Default is 3001 as per server.js, but can be overridden with PORT env var
-EXPOSE 3000
-
-# Health check to ensure the server is running
+# Health check to ensure nginx is running
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+  CMD wget --quiet --tries=1 --spider http://localhost/ || exit 1
 
-# Start the Express server with tsx to handle TypeScript files
-CMD ["npx", "tsx", "server.js"]
+# Start nginx in the foreground
+CMD ["nginx", "-g", "daemon off;"]
