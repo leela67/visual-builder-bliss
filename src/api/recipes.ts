@@ -1,7 +1,7 @@
 import { type IRecipe, type IIngredient } from '../models';
 
 // API Base URL - defaults to localhost:3001 for development
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ;
 
 export interface CreateRecipeRequest {
   title: string;
@@ -119,12 +119,13 @@ export class RecipeAPI {
         return savedRecipe;
 
       } catch (apiError) {
-        console.warn('⚠️ Backend API not available, falling back to localStorage:', apiError.message);
+        const errorMessage = apiError instanceof Error ? apiError.message : 'Unknown error';
+        console.warn('⚠️ Backend API not available, falling back to localStorage:', errorMessage);
         
         // Fallback to localStorage if API is not available
         const mockRecipe: IRecipe = {
           ...recipe,
-          _id: 'recipe_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+          _id: 'recipe_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11),
           createdAt: new Date(),
           updatedAt: new Date()
         } as IRecipe;
@@ -171,7 +172,8 @@ export class RecipeAPI {
         return recipes;
 
       } catch (apiError) {
-        console.warn('⚠️ Backend API not available, falling back to localStorage:', apiError.message);
+        const errorMessage = apiError instanceof Error ? apiError.message : 'Unknown error';
+        console.warn('⚠️ Backend API not available, falling back to localStorage:', errorMessage);
         
         // Fallback to localStorage if API is not available
         const existingRecipes = JSON.parse(localStorage.getItem('demo-recipes') || '[]');
@@ -214,7 +216,7 @@ export class RecipeAPI {
       // Check if we're in Node.js environment (server-side)
       if (typeof process !== 'undefined' && process.versions && process.versions.node) {
         // Server-side: Use database service
-        const { db } = await import('../lib/database');
+        const { db } = await import('../lib/database.js');
         return await db.getRecipe(id);
       } else {
         // Browser environment: Read from localStorage
@@ -230,7 +232,45 @@ export class RecipeAPI {
 
   static async updateRecipe(id: string, updateData: Partial<IRecipe>): Promise<IRecipe | null> {
     try {
-      return await db.updateRecipe(id, updateData);
+      // Try to call backend API first
+      try {
+        const response = await fetch(`${API_BASE_URL}/recipes/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updateData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const updatedRecipe = await response.json();
+        console.log('✅ Recipe updated via API:', updatedRecipe.title);
+        return updatedRecipe;
+
+      } catch (apiError) {
+        const errorMessage = apiError instanceof Error ? apiError.message : 'Unknown error';
+        console.warn('⚠️ Backend API not available, falling back to localStorage:', errorMessage);
+
+        // Fallback to localStorage if API is not available
+        const existingRecipes = JSON.parse(localStorage.getItem('demo-recipes') || '[]');
+        const recipeIndex = existingRecipes.findIndex((r: any) => r._id === id);
+
+        if (recipeIndex !== -1) {
+          existingRecipes[recipeIndex] = {
+            ...existingRecipes[recipeIndex],
+            ...updateData,
+            updatedAt: new Date()
+          };
+          localStorage.setItem('demo-recipes', JSON.stringify(existingRecipes));
+          console.log('💾 Recipe updated in localStorage');
+          return existingRecipes[recipeIndex];
+        }
+
+        return null;
+      }
     } catch (error) {
       console.error('Error updating recipe:', error);
       throw new Error('Failed to update recipe');
@@ -239,7 +279,36 @@ export class RecipeAPI {
 
   static async deleteRecipe(id: string): Promise<boolean> {
     try {
-      return await db.deleteRecipe(id);
+      // Try to call backend API first
+      try {
+        const response = await fetch(`${API_BASE_URL}/recipes/${id}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        console.log('✅ Recipe deleted via API');
+        return true;
+
+      } catch (apiError) {
+        const errorMessage = apiError instanceof Error ? apiError.message : 'Unknown error';
+        console.warn('⚠️ Backend API not available, falling back to localStorage:', errorMessage);
+
+        // Fallback to localStorage if API is not available
+        const existingRecipes = JSON.parse(localStorage.getItem('demo-recipes') || '[]');
+        const recipeIndex = existingRecipes.findIndex((r: any) => r._id === id);
+
+        if (recipeIndex !== -1) {
+          existingRecipes.splice(recipeIndex, 1);
+          localStorage.setItem('demo-recipes', JSON.stringify(existingRecipes));
+          console.log('💾 Recipe deleted from localStorage');
+          return true;
+        }
+
+        return false;
+      }
     } catch (error) {
       console.error('Error deleting recipe:', error);
       throw new Error('Failed to delete recipe');
@@ -251,7 +320,7 @@ export class RecipeAPI {
       // Check if we're in Node.js environment (server-side)
       if (typeof process !== 'undefined' && process.versions && process.versions.node) {
         // Server-side: Use database service
-        const { db } = await import('../lib/database');
+        const { db } = await import('../lib/database.js');
         const sessionId = userId ? undefined : `session_${Date.now()}_${Math.random()}`;
         return await db.incrementViewCount(recipeId, userId, sessionId);
       } else {
@@ -278,7 +347,7 @@ export class RecipeAPI {
       // Check if we're in Node.js environment (server-side)
       if (typeof process !== 'undefined' && process.versions && process.versions.node) {
         // Server-side: Use database service
-        const { db } = await import('../lib/database');
+        const { db } = await import('../lib/database.js');
         return await db.getViewCount(recipeId);
       } else {
         // Browser environment: Read from localStorage
