@@ -5,7 +5,7 @@ import { RecipeListItem } from './recipeService';
 export interface FavoriteItem {
   user_id: number;
   recipe_id: number;
-  recipe: RecipeListItem;
+  recipe: RecipeListItem; // Contains image_url as base64-encoded data URI
   created_at: string;
 }
 

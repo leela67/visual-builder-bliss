@@ -35,9 +35,10 @@ const RecipeCard = ({
   // Use new API format if available, fallback to old format
   const recipeId = recipe_id?.toString() || id || '';
   const recipeName = name || title || '';
-  const recipeImage = image_url || image || '';
+  // image_url now contains base64-encoded data URIs (e.g., "data:image/jpeg;base64,...")
+  const recipeImage = image_url || image || '/api/placeholder/400/300';
   const viewCount = views || 0;
-  
+
   return (
     <Link to={`/recipes/${recipeId}`}>
       <Card className="overflow-hidden hover:shadow-card-hover transition-shadow duration-200 bg-card">
@@ -46,6 +47,9 @@ const RecipeCard = ({
             src={recipeImage}
             alt={recipeName}
             className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+            onError={(e) => {
+              e.currentTarget.src = "/api/placeholder/400/300";
+            }}
           />
           <FavoriteHeartButton recipeId={recipeId} />
           {is_popular && (

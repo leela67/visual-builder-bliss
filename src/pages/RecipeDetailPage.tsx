@@ -41,7 +41,13 @@ const RecipeDetailPage = () => {
 
       try {
         setIsLoading(true);
-        const response = await RecipeService.getRecipeById(id);
+        const recipeId = parseInt(id, 10);
+        if (isNaN(recipeId)) {
+          toast.error("Invalid recipe ID");
+          navigate('/recipes');
+          return;
+        }
+        const response = await RecipeService.getRecipeById(recipeId);
 
         if (!response.success || !response.data) {
           toast.error("Recipe not found");
@@ -108,8 +114,8 @@ const RecipeDetailPage = () => {
     if (issueDescription.trim() && recipe) {
       // In a real app, this would send the report to your backend
       console.log("Report submitted:", {
-        recipeId: recipe._id,
-        recipeTitle: recipe.title,
+        recipeId: recipe.recipe_id,
+        recipeTitle: recipe.name,
         category: recipe.category,
         issueDescription,
         timestamp: new Date().toISOString()
@@ -156,6 +162,7 @@ const RecipeDetailPage = () => {
         <LoginIconButton />
       </div>
       <div className="relative">
+        {/* image_url contains base64-encoded data URIs (e.g., "data:image/jpeg;base64,...") */}
         <img
           src={recipe.image_url || "/api/placeholder/400/300"}
           alt={recipe.name}
@@ -172,7 +179,7 @@ const RecipeDetailPage = () => {
           </Link>
         </div>
         <div className="absolute top-4 right-4">
-          <FavoriteHeartButton recipeId={recipe.recipe_id} />
+          <FavoriteHeartButton recipeId={recipe.recipe_id.toString()} />
         </div>
       </div>
 
@@ -294,7 +301,7 @@ const RecipeDetailPage = () => {
               </thead>
               <tbody>
                 {recipe.ingredients && recipe.ingredients.map((ingredient, index) => {
-                  const scaledQuantity = getScaledQuantity(parseFloat(ingredient.quantity) || 0, recipe.servings);
+                  const scaledQuantity = getScaledQuantity(parseFloat(ingredient.quantity.toString()) || 0, recipe.servings);
                   return (
                     <tr key={index} className={index % 2 === 0 ? "bg-card" : "bg-accent/10"}>
                       <td className="p-3 text-card-foreground capitalize">{ingredient.name}</td>
@@ -318,9 +325,11 @@ const RecipeDetailPage = () => {
             {recipe.instructions && recipe.instructions.map((instruction, index) => (
               <div key={index} className="flex gap-4 p-4 bg-card rounded-lg shadow-card">
                 <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0">
-                  {instruction.step || index + 1}
+                  {typeof instruction === 'object' ? instruction.step : index + 1}
                 </div>
-                <p className="text-card-foreground">{instruction.description || instruction}</p>
+                <p className="text-card-foreground">
+                  {typeof instruction === 'object' ? instruction.description : instruction}
+                </p>
               </div>
             ))}
           </div>

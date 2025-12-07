@@ -4,7 +4,7 @@ import { AuthService } from './auth';
 // Recipe interfaces based on API documentation
 export interface RecipeListItem {
   recipe_id: number;
-  image_url: string;
+  image_url: string; // Base64-encoded data URI (e.g., "data:image/jpeg;base64,...")
   name: string;
   rating: number;
   cook_time: number;
@@ -27,7 +27,7 @@ export interface Recipe {
   recipe_id: number;
   name: string;
   category: RecipeCategory;
-  image_url: string;
+  image_url: string; // Base64-encoded data URI (e.g., "data:image/jpeg;base64,...")
   youtube_url?: string;
   cook_time: number;
   servings: number;
