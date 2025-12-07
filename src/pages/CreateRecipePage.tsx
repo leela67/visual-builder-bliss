@@ -233,7 +233,7 @@ const CreateRecipePage = () => {
         }))));
         
         formDataToSend.append('instructions', JSON.stringify(filteredInstructions.map((inst, index) => ({
-          step_number: index + 1,
+          step: index + 1,
           description: inst.description
         }))));
 
