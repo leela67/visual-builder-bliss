@@ -208,6 +208,31 @@ export class RecipeService {
     }
   }
 
+  // Create recipe with FormData (for file uploads)
+  static async createRecipeWithFormData(formData: FormData): Promise<ApiResponse<Recipe>> {
+    const token = AuthService.getToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/recipes`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          // Don't set Content-Type for FormData - browser will set it with boundary
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Failed to create recipe with FormData:', error);
+      throw new Error('Failed to create recipe');
+    }
+  }
+
   // Get user's recipes
   static async getUserRecipes(userId: number, page: number = 1, limit: number = 20): Promise<PaginatedResponse<RecipeListItem>> {
     try {

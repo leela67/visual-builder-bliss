@@ -38,7 +38,6 @@ const CreateRecipePage = () => {
   // Form state
   const [formData, setFormData] = useState({
     name: "",
-    image_url: "",
     category: "" as RecipeCategory | "",
     cook_time: 0,
     servings: 1,
@@ -48,6 +47,9 @@ const CreateRecipePage = () => {
     cuisine: "",
     tags: ""
   });
+
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const [ingredients, setIngredients] = useState<Ingredient[]>([{ name: "", quantity: "", unit: "" }]);
   const [instructions, setInstructions] = useState<Instruction[]>([{ step: 1, description: "" }]);
@@ -93,6 +95,39 @@ const CreateRecipePage = () => {
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/svg+xml'];
+      if (!validTypes.includes(file.type)) {
+        toast.error("Please select a valid image file (JPEG, PNG, WebP, or SVG)");
+        return;
+      }
+
+      // Validate file size (5MB max)
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > maxSize) {
+        toast.error("Image file size must be less than 5MB");
+        return;
+      }
+
+      setSelectedImage(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
   };
 
   const handleExportRecipes = () => {
@@ -167,28 +202,73 @@ const CreateRecipePage = () => {
     setIsSubmitting(true);
 
     try {
-      const recipeData: CreateRecipeRequest = {
-        name: formData.name.trim(),
-        category: formData.category,
-        image_url: formData.image_url.trim() || undefined,
-        youtube_url: formData.youtube_url.trim() || undefined,
-        cook_time: formData.cook_time,
-        servings: formData.servings,
-        difficulty: formData.difficulty,
-        cuisine: formData.cuisine.trim() || "Other",
-        calories: formData.calories,
-        tags: formData.tags.trim() ? formData.tags.split(',').map(tag => tag.trim()) : [],
-        ingredients: filteredIngredients,
-        instructions: filteredInstructions
-      };
+      // Use FormData for multipart form submission when image is present
+      if (selectedImage) {
+        const formDataToSend = new FormData();
+        
+        // Add basic fields
+        formDataToSend.append('name', formData.name.trim());
+        formDataToSend.append('category', formData.category);
+        formDataToSend.append('cook_time', formData.cook_time.toString());
+        formDataToSend.append('servings', formData.servings.toString());
+        formDataToSend.append('difficulty', formData.difficulty);
+        formDataToSend.append('cuisine', formData.cuisine.trim() || "Other");
+        formDataToSend.append('calories', formData.calories.toString());
+        
+        // Add optional fields
+        if (formData.youtube_url.trim()) {
+          formDataToSend.append('youtube_url', formData.youtube_url.trim());
+        }
+        if (formData.tags.trim()) {
+          formDataToSend.append('tags', JSON.stringify(formData.tags.split(',').map(tag => tag.trim())));
+        }
+        
+        // Add image file
+        formDataToSend.append('image', selectedImage);
+        
+        // Add ingredients and instructions as JSON strings
+        formDataToSend.append('ingredients', JSON.stringify(filteredIngredients.map(ing => ({
+          name: ing.name,
+          quantity: `${ing.quantity}${ing.unit ? ' ' + ing.unit : ''}`
+        }))));
+        
+        formDataToSend.append('instructions', JSON.stringify(filteredInstructions.map((inst, index) => ({
+          step_number: index + 1,
+          description: inst.description
+        }))));
 
-      const response = await RecipeService.createRecipe(recipeData);
+        const response = await RecipeService.createRecipeWithFormData(formDataToSend);
 
-      if (response.success && response.data) {
-        toast.success("Recipe created successfully!");
-        navigate(`/recipes/${response.data.recipe_id}`);
+        if (response.success && response.data) {
+          toast.success("Recipe created successfully!");
+          navigate(`/recipes/${response.data.recipe_id}`);
+        } else {
+          toast.error(response.message || "Failed to create recipe");
+        }
       } else {
-        toast.error(response.message || "Failed to create recipe");
+        // Use JSON format when no image
+        const recipeData: CreateRecipeRequest = {
+          name: formData.name.trim(),
+          category: formData.category,
+          youtube_url: formData.youtube_url.trim() || undefined,
+          cook_time: formData.cook_time,
+          servings: formData.servings,
+          difficulty: formData.difficulty,
+          cuisine: formData.cuisine.trim() || "Other",
+          calories: formData.calories,
+          tags: formData.tags.trim() ? formData.tags.split(',').map(tag => tag.trim()) : [],
+          ingredients: filteredIngredients,
+          instructions: filteredInstructions
+        };
+
+        const response = await RecipeService.createRecipe(recipeData);
+
+        if (response.success && response.data) {
+          toast.success("Recipe created successfully!");
+          navigate(`/recipes/${response.data.recipe_id}`);
+        } else {
+          toast.error(response.message || "Failed to create recipe");
+        }
       }
     } catch (error) {
       console.error('Error creating recipe:', error);
@@ -262,15 +342,42 @@ const CreateRecipePage = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="imageUrl" className="text-foreground font-medium">Image URL</Label>
-            <Input
-              id="imageUrl"
-              placeholder="https://example.com/image.jpg"
-              value={formData.image_url}
-              onChange={(e) => updateFormData('image_url', e.target.value)}
-              className="bg-card border-input"
-            />
-            <p className="text-xs text-muted-foreground">Paste an image URL or leave empty for default image</p>
+            <Label htmlFor="imageFile" className="text-foreground font-medium">Recipe Image</Label>
+            <div className="space-y-3">
+              {imagePreview ? (
+                <div className="relative">
+                  <img
+                    src={imagePreview}
+                    alt="Recipe preview"
+                    className="w-full h-48 object-cover rounded-lg border border-input"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={removeImage}
+                    className="absolute top-2 right-2"
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ) : (
+                <div className="border-2 border-dashed border-input rounded-lg p-6 text-center">
+                  <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground mb-2">Upload a recipe image</p>
+                  <Input
+                    id="imageFile"
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp,image/svg+xml"
+                    onChange={handleImageChange}
+                    className="bg-card border-input"
+                  />
+                </div>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Supported formats: JPEG, PNG, WebP, SVG. Maximum size: 5MB
+            </p>
           </div>
 
           <div className="space-y-2">

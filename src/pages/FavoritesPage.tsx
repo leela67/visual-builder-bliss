@@ -25,9 +25,16 @@ const FavoritesPage = () => {
       setError(null);
       const response = await FavoritesService.getFavorites();
 
-      if (response.success && response.data) {
-        setFavoriteRecipes(response.data);
+      if (response.success) {
+        // Handle successful response - data can be null for empty favorites
+        if (response.data && Array.isArray(response.data)) {
+          setFavoriteRecipes(response.data);
+        } else {
+          // Empty favorites (data is null or empty array)
+          setFavoriteRecipes([]);
+        }
       } else {
+        // Only set error for actual API failures
         setError(response.message || "Failed to load favorites");
       }
     } catch (error) {
