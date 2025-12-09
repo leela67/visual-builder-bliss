@@ -88,6 +88,20 @@ export class RecipeService {
       });
 
       const data = await response.json();
+
+      // Debug: Log sample recipe from list
+      if (data.data && data.data.length > 0) {
+        console.log('📡 API Response for getRecipes (first recipe):', {
+          recipe_id: data.data[0]?.recipe_id,
+          image_url_exists: !!data.data[0]?.image_url,
+          image_url_type: typeof data.data[0]?.image_url,
+          image_url_length: data.data[0]?.image_url?.length,
+          image_url_first_100_chars: data.data[0]?.image_url?.substring(0, 100),
+          is_data_uri: data.data[0]?.image_url?.startsWith('data:'),
+          total_recipes: data.data.length
+        });
+      }
+
       return data;
     } catch (error) {
       console.error('Failed to fetch recipes:', error);
@@ -99,7 +113,7 @@ export class RecipeService {
   static async searchRecipes(filters: SearchFilters): Promise<PaginatedResponse<RecipeListItem>> {
     try {
       const params = new URLSearchParams();
-      
+
       if (filters.search) params.append('search', filters.search);
       if (filters.meal_type) params.append('meal_type', filters.meal_type);
       if (filters.veg !== undefined) params.append('veg', filters.veg.toString());
@@ -114,6 +128,20 @@ export class RecipeService {
       });
 
       const data = await response.json();
+
+      // Debug: Log sample recipe from search results
+      if (data.data && data.data.length > 0) {
+        console.log('📡 API Response for searchRecipes (first recipe):', {
+          recipe_id: data.data[0]?.recipe_id,
+          image_url_exists: !!data.data[0]?.image_url,
+          image_url_type: typeof data.data[0]?.image_url,
+          image_url_length: data.data[0]?.image_url?.length,
+          image_url_first_100_chars: data.data[0]?.image_url?.substring(0, 100),
+          is_data_uri: data.data[0]?.image_url?.startsWith('data:'),
+          total_recipes: data.data.length
+        });
+      }
+
       return data;
     } catch (error) {
       console.error('Failed to search recipes:', error);
@@ -176,6 +204,18 @@ export class RecipeService {
       });
 
       const data = await response.json();
+
+      // Debug: Log the raw API response
+      console.log('📡 API Response for getRecipeById:', {
+        recipe_id: data.data?.recipe_id,
+        image_url_exists: !!data.data?.image_url,
+        image_url_type: typeof data.data?.image_url,
+        image_url_length: data.data?.image_url?.length,
+        image_url_first_100_chars: data.data?.image_url?.substring(0, 100),
+        is_data_uri: data.data?.image_url?.startsWith('data:'),
+        raw_data: data
+      });
+
       return data;
     } catch (error) {
       console.error('Failed to fetch recipe:', error);

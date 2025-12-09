@@ -15,6 +15,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { RecipeService, type Recipe } from "@/api/recipeService";
 import { toast } from "sonner";
+import { logImageAnalysis, normalizeImageUrl } from "@/utils/imageDebugger";
 
 const RecipeDetailPage = () => {
   const { id } = useParams();
@@ -54,6 +55,9 @@ const RecipeDetailPage = () => {
           navigate('/recipes');
           return;
         }
+
+        // Debug: Analyze the recipe image
+        logImageAnalysis(response.data.image_url, `Recipe #${response.data.recipe_id} - ${response.data.name}`);
 
         setRecipe(response.data);
         setCurrentServings(response.data.servings);
@@ -164,11 +168,21 @@ const RecipeDetailPage = () => {
       <div className="relative">
         {/* image_url contains base64-encoded data URIs (e.g., "data:image/jpeg;base64,...") */}
         <img
-          src={recipe.image_url || "/api/placeholder/400/300"}
+          src={normalizeImageUrl(recipe.image_url, "https://placehold.co/800x400/e2e8f0/64748b?text=Recipe+Image")}
           alt={recipe.name}
           className="w-full h-64 object-cover"
           onError={(e) => {
-            e.currentTarget.src = "/api/placeholder/400/300";
+            const target = e.currentTarget;
+            console.error('❌ Recipe detail image failed to load', {
+              attempted_src: target.src,
+              recipe_id: recipe.recipe_id,
+              recipe_name: recipe.name,
+              original_image_url: recipe.image_url
+            });
+            // Prevent infinite loop - only set fallback once
+            if (!target.src.includes('placehold.co')) {
+              target.src = "https://placehold.co/800x400/e2e8f0/64748b?text=Recipe+Image";
+            }
           }}
         />
         <div className="absolute top-4 left-4">
