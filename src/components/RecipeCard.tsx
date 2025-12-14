@@ -4,7 +4,6 @@ import { Eye, Clock } from "lucide-react";
 import StarRating from "./StarRating";
 import FavoriteHeartButton from "./ui/FavoriteHeartButton";
 import { logImageAnalysis, normalizeImageUrl } from "@/utils/imageDebugger";
-import ImageDebugOverlay from "./ImageDebugOverlay";
 
 interface RecipeCardProps {
   // Support both old and new API formats
@@ -73,8 +72,6 @@ const RecipeCard = ({
               Popular
             </div>
           )}
-          {/* Debug overlay - only visible in development */}
-          <ImageDebugOverlay imageUrl={image_url} recipeName={recipeName} />
         </div>
         <div className="p-4">
           <h3 className="font-semibold text-card-foreground mb-2 line-clamp-2">{recipeName}</h3>

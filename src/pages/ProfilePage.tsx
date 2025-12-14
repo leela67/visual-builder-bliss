@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { AuthService } from "@/api/auth";
 import { toast } from "sonner";
-import type { User as UserType } from "@/models/User";
+import BottomNavigation from "@/components/BottomNavigation";
+import type { User as UserType } from "@/api/auth";
 
 const AVAILABLE_INTERESTS = [
   "Vegetarian", "Non-Vegetarian", "Vegan", "Gluten-Free", "Keto",
@@ -270,6 +271,7 @@ const ProfilePage = () => {
           </div>
         </div>
       </main>
+      <BottomNavigation />
     </div>
   );
 };

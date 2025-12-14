@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import StarRating from "@/components/StarRating";
 import BottomNavigation from "@/components/BottomNavigation";
 import FavoriteHeartButton from "@/components/ui/FavoriteHeartButton";
+import RatingInput from "@/components/RatingInput";
+import RatingDisplay from "@/components/RatingDisplay";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { RecipeService, type Recipe } from "@/api/recipeService";
@@ -25,6 +27,7 @@ const RecipeDetailPage = () => {
   const [currentServings, setCurrentServings] = useState(1);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [issueDescription, setIssueDescription] = useState("");
+  const [ratingRefreshTrigger, setRatingRefreshTrigger] = useState(0);
 
   // Helper function to convert YouTube URL to embed URL
   const getEmbedUrl = (url: string) => {
@@ -160,7 +163,7 @@ const RecipeDetailPage = () => {
 
 
   return (
-    <div className="min-h-screen bg-background pb-20" style={{ position: "relative" }}>
+    <div className="min-h-screen bg-background pb-20 md:pb-6" style={{ position: "relative" }}>
       <div style={{ position: "absolute", top: 16, right: 16, display: "flex", flexDirection: "row", zIndex: 50 }}>
         <InfoIconButton />
         <LoginIconButton />
@@ -170,7 +173,7 @@ const RecipeDetailPage = () => {
         <img
           src={normalizeImageUrl(recipe.image_url, "https://placehold.co/800x400/e2e8f0/64748b?text=Recipe+Image")}
           alt={recipe.name}
-          className="w-full h-64 object-cover"
+          className="w-full h-80 md:h-96 object-cover"
           onError={(e) => {
             const target = e.currentTarget;
             console.error('❌ Recipe detail image failed to load', {
@@ -272,23 +275,60 @@ const RecipeDetailPage = () => {
         </div>
 
         {recipe.youtube_url && getEmbedUrl(recipe.youtube_url) && (
-          <div className="mb-6">
-            <div className="bg-card rounded-lg p-4 shadow-card">
-              <h3 className="font-semibold text-card-foreground mb-3 flex items-center gap-2">
-                <Youtube className="w-5 h-5 text-primary" />
-                Video Tutorial
-              </h3>
-              <div className="aspect-video w-full">
+          <>
+            {/* Mobile YouTube Video - Keep current implementation */}
+            <div className="mb-6 md:hidden">
+              <div className="bg-card rounded-lg p-4 shadow-card">
+                <h3 className="font-semibold text-card-foreground mb-3 flex items-center gap-2">
+                  <Youtube className="w-5 h-5 text-primary" />
+                  Video Tutorial
+                </h3>
+                <div className="aspect-video w-full">
+                  <iframe
+                    src={getEmbedUrl(recipe.youtube_url)}
+                    title="Recipe Video Tutorial"
+                    className="w-full h-full rounded-lg"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop Floating YouTube Video */}
+            <div className="hidden md:block fixed top-4 right-4 z-40 w-80 bg-card rounded-lg shadow-lg overflow-hidden">
+              <div className="bg-card p-2 flex items-center justify-between border-b">
+                <h4 className="text-sm font-medium text-card-foreground flex items-center gap-2">
+                  <Youtube className="w-4 h-4 text-primary" />
+                  Video Tutorial
+                </h4>
+                <button
+                  onClick={() => {
+                    const iframe = document.querySelector('#floating-video') as HTMLIFrameElement;
+                    if (iframe) {
+                      // Toggle play/pause by reloading iframe (simple implementation)
+                      const currentSrc = iframe.src;
+                      iframe.src = '';
+                      setTimeout(() => iframe.src = currentSrc, 100);
+                    }
+                  }}
+                  className="text-xs px-2 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
+                >
+                  Toggle
+                </button>
+              </div>
+              <div className="aspect-video">
                 <iframe
+                  id="floating-video"
                   src={getEmbedUrl(recipe.youtube_url)}
                   title="Recipe Video Tutorial"
-                  className="w-full h-full rounded-lg"
+                  className="w-full h-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 />
               </div>
             </div>
-          </div>
+          </>
         )}
 
         {recipe.calories && (
@@ -401,6 +441,22 @@ const RecipeDetailPage = () => {
             </DialogContent>
           </Dialog>
         </div>
+
+        {/* Rating Section */}
+        <section className="mb-8">
+          <RatingInput
+            recipeId={recipe.recipe_id}
+            onRatingSubmitted={() => setRatingRefreshTrigger(prev => prev + 1)}
+            onRatingDeleted={() => setRatingRefreshTrigger(prev => prev + 1)}
+          />
+        </section>
+
+        <section className="mb-8">
+          <RatingDisplay
+            recipeId={recipe.recipe_id}
+            refreshTrigger={ratingRefreshTrigger}
+          />
+        </section>
       </main>
 
       <BottomNavigation />

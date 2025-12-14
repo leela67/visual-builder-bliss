@@ -141,7 +141,7 @@ const RecipesPage = () => {
 
   return (
     <div 
-      className="min-h-screen bg-background pb-20" 
+      className="min-h-screen bg-background pb-20 md:pb-6"
       style={{ 
         position: "relative",
         WebkitOverflowScrolling: "touch"

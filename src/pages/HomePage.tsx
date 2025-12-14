@@ -135,7 +135,7 @@ const HomePage = () => {
     // Get a random recipe from available recipes
     if (featuredRecipes.length > 0) {
       const randomRecipe = featuredRecipes[Math.floor(Math.random() * featuredRecipes.length)];
-      navigate(`/recipes/${randomRecipe._id}`);
+      navigate(`/recipes/${randomRecipe.recipe_id}`);
     }
   };
 
@@ -185,7 +185,7 @@ const HomePage = () => {
 
   return (
     <div 
-      className="min-h-screen bg-background pb-20" 
+      className="min-h-screen bg-background pb-20 md:pb-6"
       style={{ 
         position: "relative",
         WebkitOverflowScrolling: "touch"
