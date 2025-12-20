@@ -16,6 +16,14 @@ import beingHomeLogo from "/beinghomelogo.jpeg";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 
+// Pre-defined options for tags
+const COMMON_TAGS = [
+  "Vegetarian", "Vegan", "Gluten-Free", "Dairy-Free", "Keto", "Low-Carb",
+  "High-Protein", "Healthy", "Quick", "Easy", "Comfort Food", "Spicy",
+  "Sweet", "Savory", "Breakfast", "Lunch", "Dinner", "Snack", "Dessert",
+  "Appetizer", "Main Course", "Side Dish", "Soup", "Salad", "Beverage"
+];
+
 // Development helper function to export localStorage recipes
 const exportRecipesToConsole = () => {
   const recipes = JSON.parse(localStorage.getItem('demo-recipes') || '[]');
@@ -55,6 +63,27 @@ const CreateRecipePage = () => {
 
   const [ingredients, setIngredients] = useState<Ingredient[]>([{ name: "", quantity: "", unit: "" }]);
   const [instructions, setInstructions] = useState<Instruction[]>([{ step: 1, description: "" }]);
+  
+  // State for custom tag input
+  const [customTag, setCustomTag] = useState("");
+
+  // Helper functions for tags
+  const addTag = (tag: string) => {
+    if (tag && !formData.tags.includes(tag as any)) {
+      updateFormData('tags', [...formData.tags, tag]);
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    updateFormData('tags', formData.tags.filter(tag => tag !== tagToRemove));
+  };
+
+  const handleCustomTagAdd = () => {
+    if (customTag.trim()) {
+      addTag(customTag.trim());
+      setCustomTag("");
+    }
+  };
 
   const addIngredient = () => {
     setIngredients([...ingredients, { name: "", quantity: "", unit: "" }]);
@@ -454,68 +483,17 @@ const CreateRecipePage = () => {
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="calories" className="text-foreground font-medium">Calories</Label>
-                <Input
-                  id="calories"
-                  placeholder="Enter calories (e.g., 300)"
-                  type="number"
-                  min="0"
-                  value={formData.calories}
-                  onChange={(e) => updateFormData('calories', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                  className="bg-card border-input"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-foreground font-medium">Tags</Label>
-                <Select
-                  value=""
-                  onValueChange={(value) => {
-                    const tag = value as RecipeTag;
-                    if (!formData.tags.includes(tag)) {
-                      updateFormData('tags', [...formData.tags, tag]);
-                    }
-                  }}
-                >
-                  <SelectTrigger className="bg-card border-input">
-                    <SelectValue placeholder="Add tags..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {RECIPE_TAGS.map((tag) => (
-                      <SelectItem
-                        key={tag}
-                        value={tag}
-                        disabled={formData.tags.includes(tag)}
-                      >
-                        {tag}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {formData.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {formData.tags.map((tag) => (
-                      <Badge
-                        key={tag}
-                        variant="secondary"
-                        className="gap-1 pr-1"
-                      >
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={() => updateFormData('tags', formData.tags.filter(t => t !== tag))}
-                          className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="calories" className="text-foreground font-medium">Calories</Label>
+            <Input
+              id="calories"
+              placeholder="Enter calories (e.g., 300)"
+              type="number"
+              min="0"
+              value={formData.calories}
+              onChange={(e) => updateFormData('calories', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+              className="bg-card border-input"
+            />
           </div>
 
           <div className="space-y-4">
@@ -614,32 +592,96 @@ const CreateRecipePage = () => {
             </div>
           </div>
 
-          <div className="flex gap-3">
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground py-3 text-lg"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Creating Recipe...
-                </>
-              ) : (
-                "Publish Recipe"
-              )}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleExportRecipes}
-              className="px-6 py-3 gap-2"
-              title="Export all localStorage recipes for syncing to database"
-            >
-              <Download className="w-4 h-4" />
-              Sync to DB
-            </Button>
+          {/* Tags Section - Profile page style */}
+          <div className="space-y-3">
+            <Label className="text-foreground font-medium flex items-center gap-2">
+              Tags
+            </Label>
+            
+            {/* Selected Tags Display */}
+            {formData.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 p-3 bg-muted/30 rounded-md">
+                {formData.tags.map((tag, index) => (
+                  <Badge
+                    key={index}
+                    variant="default"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
+                    onClick={() => removeTag(tag)}
+                  >
+                    {tag}
+                    <X className="w-3 h-3 ml-1" />
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            {/* Available Tags Selection - Profile page style */}
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Select tags for your recipe:</p>
+              <div className="flex flex-wrap gap-2">
+                {COMMON_TAGS.map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant={formData.tags.includes(tag as any) ? "default" : "secondary"}
+                    className={`cursor-pointer transition-colors ${
+                      formData.tags.includes(tag as any)
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                        : "hover:bg-secondary/80"
+                    }`}
+                    onClick={() => {
+                      if (formData.tags.includes(tag as any)) {
+                        removeTag(tag);
+                      } else {
+                        addTag(tag);
+                      }
+                    }}
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom Tag Input */}
+            <div className="flex gap-2">
+              <Input
+                placeholder="Add custom tag"
+                value={customTag}
+                onChange={(e) => setCustomTag(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleCustomTagAdd();
+                  }
+                }}
+                className="bg-card border-input flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleCustomTagAdd}
+                disabled={!customTag.trim()}
+              >
+                Add
+              </Button>
+            </div>
           </div>
+
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 text-lg"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Creating Recipe...
+              </>
+            ) : (
+              "Publish Recipe"
+            )}
+          </Button>
         </form>
       </main>
 

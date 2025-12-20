@@ -117,7 +117,7 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24 lg:pb-6">
       {/* Header */}
       <header className="bg-card shadow-sm border-b border-border">
         <div className="px-4 py-4">

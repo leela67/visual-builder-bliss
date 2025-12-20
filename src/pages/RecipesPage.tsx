@@ -140,9 +140,9 @@ const RecipesPage = () => {
   }, [lastScrollY]);
 
   return (
-    <div 
-      className="min-h-screen bg-background pb-20 md:pb-6"
-      style={{ 
+    <div
+      className="min-h-screen bg-background pb-24 lg:pb-6"
+      style={{
         position: "relative",
         WebkitOverflowScrolling: "touch"
       }}
