@@ -393,10 +393,8 @@ const HomePage = () => {
         </Button>
       </div>
 
-      {/* Fixed Bottom Navigation Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
-        <BottomNavigation />
-      </div>
+      {/* Bottom Navigation Bar */}
+      <BottomNavigation />
     </div>
   );
 };

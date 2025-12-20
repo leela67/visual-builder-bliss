@@ -55,5 +55,53 @@ export const DIFFICULTY_LEVELS = [
   'Hard'
 ] as const;
 
+// Predefined recipe tags
+export const RECIPE_TAGS = [
+  'Vegetarian',
+  'Vegan',
+  'Gluten-Free',
+  'Dairy-Free',
+  'Low-Carb',
+  'Keto',
+  'Paleo',
+  'High-Protein',
+  'Quick & Easy',
+  'One-Pot',
+  'Meal Prep',
+  'Kid-Friendly',
+  'Healthy',
+  'Comfort Food',
+  'Spicy',
+  'Sweet',
+  'Savory',
+  'Budget-Friendly'
+] as const;
+
+// Predefined cuisine types
+export const CUISINE_TYPES = [
+  'American',
+  'Italian',
+  'Mexican',
+  'Chinese',
+  'Japanese',
+  'Thai',
+  'Indian',
+  'French',
+  'Greek',
+  'Mediterranean',
+  'Middle Eastern',
+  'Korean',
+  'Vietnamese',
+  'Spanish',
+  'Caribbean',
+  'African',
+  'British',
+  'German',
+  'Brazilian',
+  'Other'
+] as const;
+
 export type RecipeCategory = typeof RECIPE_CATEGORIES[number];
 export type DifficultyLevel = typeof DIFFICULTY_LEVELS[number];
+export type RecipeTag = typeof RECIPE_TAGS[number];
+export type CuisineType = typeof CUISINE_TYPES[number];

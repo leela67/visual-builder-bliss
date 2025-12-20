@@ -9,10 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import BottomNavigation from "@/components/BottomNavigation";
 import { Link, useNavigate } from "react-router-dom";
 import { RecipeService, type CreateRecipeRequest, type Ingredient, type Instruction } from "@/api/recipeService";
-import { RECIPE_CATEGORIES, DIFFICULTY_LEVELS, type RecipeCategory, type DifficultyLevel } from "@/api/config";
+import { RECIPE_CATEGORIES, DIFFICULTY_LEVELS, RECIPE_TAGS, CUISINE_TYPES, type RecipeCategory, type DifficultyLevel, type RecipeTag, type CuisineType } from "@/api/config";
 import { toast } from "sonner";
 import InfoIconButton from "../components/ui/InfoIconButton";
 import beingHomeLogo from "/beinghomelogo.jpeg";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 
 // Development helper function to export localStorage recipes
 const exportRecipesToConsole = () => {
@@ -41,11 +43,11 @@ const CreateRecipePage = () => {
     category: "" as RecipeCategory | "",
     cook_time: 0,
     servings: 1,
-    calories: 0,
+    calories: "" as string | number, // Changed to allow empty string
     youtube_url: "",
     difficulty: "Medium" as DifficultyLevel,
-    cuisine: "",
-    tags: ""
+    cuisine: "" as CuisineType | "",
+    tags: [] as RecipeTag[]
   });
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -212,15 +214,15 @@ const CreateRecipePage = () => {
         formDataToSend.append('cook_time', formData.cook_time.toString());
         formDataToSend.append('servings', formData.servings.toString());
         formDataToSend.append('difficulty', formData.difficulty);
-        formDataToSend.append('cuisine', formData.cuisine.trim() || "Other");
-        formDataToSend.append('calories', formData.calories.toString());
-        
+        formDataToSend.append('cuisine', formData.cuisine || "Other");
+        formDataToSend.append('calories', (typeof formData.calories === 'number' ? formData.calories : parseInt(formData.calories) || 0).toString());
+
         // Add optional fields
         if (formData.youtube_url.trim()) {
           formDataToSend.append('youtube_url', formData.youtube_url.trim());
         }
-        if (formData.tags.trim()) {
-          formDataToSend.append('tags', JSON.stringify(formData.tags.split(',').map(tag => tag.trim())));
+        if (formData.tags.length > 0) {
+          formDataToSend.append('tags', JSON.stringify(formData.tags));
         }
         
         // Add image file
@@ -254,9 +256,9 @@ const CreateRecipePage = () => {
           cook_time: formData.cook_time,
           servings: formData.servings,
           difficulty: formData.difficulty,
-          cuisine: formData.cuisine.trim() || "Other",
-          calories: formData.calories,
-          tags: formData.tags.trim() ? formData.tags.split(',').map(tag => tag.trim()) : [],
+          cuisine: formData.cuisine || "Other",
+          calories: typeof formData.calories === 'number' ? formData.calories : parseInt(formData.calories) || 0,
+          tags: formData.tags,
           ingredients: filteredIngredients,
           instructions: filteredInstructions
         };
@@ -439,13 +441,16 @@ const CreateRecipePage = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="cuisine" className="text-foreground font-medium">Cuisine</Label>
-              <Input
-                id="cuisine"
-                placeholder="Italian, Asian, etc."
-                value={formData.cuisine}
-                onChange={(e) => updateFormData('cuisine', e.target.value)}
-                className="bg-card border-input"
-              />
+              <Select value={formData.cuisine} onValueChange={(value) => updateFormData('cuisine', value as CuisineType)}>
+                <SelectTrigger className="bg-card border-input">
+                  <SelectValue placeholder="Select cuisine type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CUISINE_TYPES.map((cuisine) => (
+                    <SelectItem key={cuisine} value={cuisine}>{cuisine}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -453,26 +458,62 @@ const CreateRecipePage = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="calories" className="text-foreground font-medium">Calories</Label>
-                <Input 
+                <Input
                   id="calories"
-                  placeholder="300"
+                  placeholder="Enter calories (e.g., 300)"
                   type="number"
                   min="0"
                   value={formData.calories}
-                  onChange={(e) => updateFormData('calories', parseInt(e.target.value) || 0)}
+                  onChange={(e) => updateFormData('calories', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                   className="bg-card border-input"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="tags" className="text-foreground font-medium">Tags</Label>
-                <Input 
-                  id="tags"
-                  placeholder="healthy, quick, vegetarian"
-                  value={formData.tags}
-                  onChange={(e) => updateFormData('tags', e.target.value)}
-                  className="bg-card border-input"
-                />
-                <p className="text-xs text-muted-foreground">Separate tags with commas</p>
+                <Label className="text-foreground font-medium">Tags</Label>
+                <Select
+                  value=""
+                  onValueChange={(value) => {
+                    const tag = value as RecipeTag;
+                    if (!formData.tags.includes(tag)) {
+                      updateFormData('tags', [...formData.tags, tag]);
+                    }
+                  }}
+                >
+                  <SelectTrigger className="bg-card border-input">
+                    <SelectValue placeholder="Add tags..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RECIPE_TAGS.map((tag) => (
+                      <SelectItem
+                        key={tag}
+                        value={tag}
+                        disabled={formData.tags.includes(tag)}
+                      >
+                        {tag}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formData.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {formData.tags.map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant="secondary"
+                        className="gap-1 pr-1"
+                      >
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => updateFormData('tags', formData.tags.filter(t => t !== tag))}
+                          className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
