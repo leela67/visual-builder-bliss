@@ -76,6 +76,22 @@ export interface RandomRecipeFilters {
   limit?: number;
 }
 
+export interface RandomRecipeResponse {
+  recipe_id: number;
+  name: string;
+  image_url: string;
+  rating: number;
+  cook_time: number;
+  views: number;
+  is_popular: boolean;
+  user_id: number | null;
+  is_admin_recipe: boolean;
+  is_active: number;
+  is_approve: number;
+  approved_by: number | null;
+  intelligent_suggestion: string | null;
+}
+
 export class RecipeService {
   // Get all recipes with pagination
   static async getRecipes(page: number = 1, limit: number = 20): Promise<PaginatedResponse<RecipeListItem>> {
@@ -190,6 +206,43 @@ export class RecipeService {
     } catch (error) {
       console.error('Failed to fetch random recipes:', error);
       throw new Error('Failed to fetch random recipes');
+    }
+  }
+
+  // Get single random recipe with intelligent suggestions
+  static async getRandomRecipe(): Promise<ApiResponse<RandomRecipeResponse>> {
+    try {
+      const token = AuthService.getToken();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      // Add authorization header if token exists for better personalization
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/recipes/random`, {
+        method: 'GET',
+        headers,
+      });
+
+      const data = await response.json();
+
+      // Debug: Log the random recipe response
+      console.log('📡 API Response for getRandomRecipe:', {
+        recipe_id: data.data?.recipe_id,
+        name: data.data?.name,
+        intelligent_suggestion: data.data?.intelligent_suggestion,
+        image_url_exists: !!data.data?.image_url,
+        is_data_uri: data.data?.image_url?.startsWith('data:'),
+        raw_data: data
+      });
+
+      return data;
+    } catch (error) {
+      console.error('Failed to fetch random recipe:', error);
+      throw new Error('Failed to fetch random recipe');
     }
   }
 

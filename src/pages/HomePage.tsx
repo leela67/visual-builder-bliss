@@ -6,8 +6,10 @@ import { Card } from "@/components/ui/card";
 import { Link, useNavigate } from "react-router-dom";
 import BottomNavigation from "@/components/BottomNavigation";
 import RecipeCard from "@/components/RecipeCard";
+import RandomRecipeModal from "@/components/RandomRecipeModal";
 import { useState, useEffect, useRef } from "react";
-import { RecipeService, type RecipeListItem } from "@/api/recipeService";
+import { RecipeService, type RecipeListItem, type RandomRecipeResponse } from "@/api/recipeService";
+import { toast } from "sonner";
 import beingHomeLogo from "/beinghomelogo.jpeg";
 
 const HomePage = () => {
@@ -18,6 +20,11 @@ const HomePage = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Random recipe modal state
+  const [isRandomModalOpen, setIsRandomModalOpen] = useState(false);
+  const [randomRecipe, setRandomRecipe] = useState<RandomRecipeResponse | null>(null);
+  const [isLoadingRandom, setIsLoadingRandom] = useState(false);
 
   useEffect(() => {
     const fetchFeaturedRecipes = async () => {
@@ -131,12 +138,43 @@ const HomePage = () => {
     };
   }, [lastScrollY]);
 
-  const handleWhatToCook = () => {
-    // Get a random recipe from available recipes
-    if (featuredRecipes.length > 0) {
-      const randomRecipe = featuredRecipes[Math.floor(Math.random() * featuredRecipes.length)];
-      navigate(`/recipes/${randomRecipe.recipe_id}`);
+  const handleWhatToCook = async () => {
+    setIsRandomModalOpen(true);
+    await fetchRandomRecipe();
+  };
+
+  const fetchRandomRecipe = async () => {
+    setIsLoadingRandom(true);
+    try {
+      const response = await RecipeService.getRandomRecipe();
+      if (response.success && response.data) {
+        setRandomRecipe(response.data);
+      } else {
+        toast.error(response.message || "Failed to get random recipe");
+        setRandomRecipe(null);
+      }
+    } catch (error) {
+      console.error('Error fetching random recipe:', error);
+      toast.error("Failed to get random recipe. Please try again.");
+      setRandomRecipe(null);
+    } finally {
+      setIsLoadingRandom(false);
     }
+  };
+
+  const handleStartCooking = (recipeId: number) => {
+    setIsRandomModalOpen(false);
+    navigate(`/recipes/${recipeId}`);
+  };
+
+  const handleTryAnother = async () => {
+    setRandomRecipe(null);
+    await fetchRandomRecipe();
+  };
+
+  const handleCloseModal = () => {
+    setIsRandomModalOpen(false);
+    setRandomRecipe(null);
   };
 
   // Placeholder social media posts
@@ -392,6 +430,16 @@ const HomePage = () => {
           </span>
         </Button>
       </div>
+
+      {/* Random Recipe Modal */}
+      <RandomRecipeModal
+        isOpen={isRandomModalOpen}
+        onClose={handleCloseModal}
+        recipe={randomRecipe}
+        isLoading={isLoadingRandom}
+        onStartCooking={handleStartCooking}
+        onTryAnother={handleTryAnother}
+      />
 
       {/* Bottom Navigation Bar */}
       <BottomNavigation />
