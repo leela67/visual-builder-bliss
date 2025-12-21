@@ -10,11 +10,11 @@ const BottomNavigation = () => {
     return false;
   };
 
-  // Mobile navigation items (with Create button)
+  // Mobile navigation items (with K-Bank button)
   const mobileNavItems = [
     { icon: Home, label: "Home", path: "/" },
     { icon: BookOpen, label: "Recipes", path: "/recipes" },
-    { icon: Plus, label: "Create", path: "/create-recipe", isSpecial: true },
+    { icon: Utensils, label: "K-Bank", path: "/k-bank", isSpecial: true },
     { icon: Heart, label: "Favorites", path: "/favorites" },
     { icon: User, label: "Profile", path: "/profile" },
   ];

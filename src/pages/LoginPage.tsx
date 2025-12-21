@@ -22,7 +22,10 @@ export default function LoginPage() {
     e.preventDefault();
 
     if (!phoneNumber.trim() || !password.trim()) {
-      toast.error("Please fill in all fields");
+      toast.error("Please fill in all fields", {
+        position: "top-center",
+        duration: 4000,
+      });
       return;
     }
 
@@ -33,20 +36,29 @@ export default function LoginPage() {
       const response = await AuthService.login(fullPhoneNumber, password);
 
       if (response.success) {
-        toast.success("Login successful!");
+        toast.success("Login successful!", {
+          position: "top-center",
+          duration: 3000,
+        });
         navigate("/"); // Redirect to home page
       } else {
-        toast.error(response.message || "Login failed");
+        toast.error(response.message || "Login failed", {
+          position: "top-center",
+          duration: 5000,
+        });
       }
     } catch (error) {
-      toast.error("An error occurred. Please try again.");
+      toast.error("An error occurred. Please try again.", {
+        position: "top-center",
+        duration: 5000,
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24 lg:pb-20 flex flex-col" style={{ position: "relative" }}>
+    <div className="min-h-screen bg-background pb-32 lg:pb-20 flex flex-col" style={{ position: "relative" }}>
       <header className="bg-card shadow-card border-b border-border w-full">
         <div className="px-4 py-4">
           <div className="flex items-center gap-3 mb-4">
