@@ -33,7 +33,7 @@ const BottomNavigation = () => {
       {/* Mobile Navigation - Floating */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50">
         {/* Floating container with gap from bottom */}
-        <div className="px-4 pb-3">
+        <div className="px-4 pb-6">
           <div className="bg-card/95 backdrop-blur-md border border-border rounded-2xl shadow-2xl">
             <div className="flex items-center justify-around h-16 px-2">
               {mobileNavItems.map((item) => {
