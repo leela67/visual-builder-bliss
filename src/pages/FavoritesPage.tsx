@@ -46,7 +46,7 @@ const FavoritesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24 lg:pb-6" style={{ position: "relative" }}>
+    <div className="min-h-screen bg-background pb-24 lg:pb-20" style={{ position: "relative" }}>
       <header className="bg-card shadow-card border-b border-border">
         <div className="px-4 py-4">
           {/* Logo and Info Button Row */}

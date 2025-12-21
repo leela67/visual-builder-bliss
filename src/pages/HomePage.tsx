@@ -223,7 +223,7 @@ const HomePage = () => {
 
   return (
     <div
-      className="min-h-screen bg-background pb-24 lg:pb-6"
+      className="min-h-screen bg-background pb-24 lg:pb-20"
       style={{
         position: "relative",
         WebkitOverflowScrolling: "touch"

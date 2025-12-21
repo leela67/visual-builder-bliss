@@ -46,7 +46,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20 flex flex-col" style={{ position: "relative" }}>
+    <div className="min-h-screen bg-background pb-24 lg:pb-20 flex flex-col" style={{ position: "relative" }}>
       <header className="bg-card shadow-card border-b border-border w-full">
         <div className="px-4 py-4">
           <div className="flex items-center gap-3 mb-4">
