@@ -157,6 +157,18 @@ export default function LoginPage() {
               Register
             </Link>
           </div>
+          
+          {/* Terms and Privacy Policy Links */}
+          <div className="mt-4 text-center text-xs text-muted-foreground">
+            By logging in, you agree to our{" "}
+            <Link to="/terms" className="text-primary hover:underline">
+              Terms and Conditions
+            </Link>
+            {" "}and{" "}
+            <Link to="/privacy" className="text-primary hover:underline">
+              Privacy Policy
+            </Link>
+          </div>
         </div>
       </main>
       <BottomNavigation />

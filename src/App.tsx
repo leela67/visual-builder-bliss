@@ -13,6 +13,8 @@ import RecipeDetailPage from "./pages/RecipeDetailPage";
 import CreateRecipePage from "./pages/CreateRecipePage";
 import KBankPage from "./pages/KBankPage";
 import FavoritesPage from "./pages/FavoritesPage";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -47,6 +49,8 @@ const App = () => (
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegistrationPage />} />
           <Route path="/info" element={<InfoPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

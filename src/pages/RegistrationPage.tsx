@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Loader2, Plus, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import BottomNavigation from "@/components/BottomNavigation";
@@ -26,6 +27,7 @@ export default function RegistrationPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [interests, setInterests] = useState<string[]>([]);
+  const [acceptedTermsAndPrivacy, setAcceptedTermsAndPrivacy] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const toggleInterest = (interest: string) => {
@@ -51,6 +53,11 @@ export default function RegistrationPage() {
 
     if (password.length < 6) {
       toast.error("Password must be at least 6 characters long");
+      return;
+    }
+
+    if (!acceptedTermsAndPrivacy) {
+      toast.error("Please accept the Terms and Conditions and Privacy Policy to continue");
       return;
     }
 
@@ -190,10 +197,43 @@ export default function RegistrationPage() {
               )}
             </div>
 
+            {/* Terms and Privacy Policy Checkbox */}
+            <div className="space-y-3">
+              <div className="flex items-start space-x-2">
+                <Checkbox
+                  id="terms-privacy"
+                  checked={acceptedTermsAndPrivacy}
+                  onCheckedChange={(checked) => setAcceptedTermsAndPrivacy(checked as boolean)}
+                  disabled={isLoading}
+                />
+                <div className="grid gap-1.5 leading-none">
+                  <label
+                    htmlFor="terms-privacy"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    I agree to the{" "}
+                    <Link
+                      to="/terms"
+                      className="text-primary hover:underline"
+                    >
+                      Terms and Conditions
+                    </Link>
+                    {" "}and{" "}
+                    <Link
+                      to="/privacy"
+                      className="text-primary hover:underline"
+                    >
+                      Privacy Policy
+                    </Link>
+                  </label>
+                </div>
+              </div>
+            </div>
+
             <Button
               type="submit"
               className="w-full"
-              disabled={isLoading}
+              disabled={isLoading || !acceptedTermsAndPrivacy}
             >
               {isLoading ? (
                 <>

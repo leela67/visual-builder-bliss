@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, User, Phone, Heart, LogOut, Edit, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -268,6 +268,25 @@ const ProfilePage = () => {
                 </Button>
               </div>
             )}
+          </div>
+          
+          {/* Terms and Privacy Policy Links */}
+          <div className="mt-6 pt-6 border-t border-border">
+            <h3 className="text-sm font-medium text-foreground mb-3">Legal</h3>
+            <div className="space-y-2">
+              <Link
+                to="/terms"
+                className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Terms and Conditions
+              </Link>
+              <Link
+                to="/privacy"
+                className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Privacy Policy
+              </Link>
+            </div>
           </div>
         </div>
       </main>
