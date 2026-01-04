@@ -41,11 +41,19 @@ export const API_ERROR_CODES = {
 // Recipe categories as per API documentation
 export const RECIPE_CATEGORIES = [
   'Breakfast',
-  'Lunch', 
+  'Lunch',
   'Dinner',
   'Snack',
   'Dessert',
   'Beverage'
+] as const;
+
+// Dietary types as per API documentation
+export const DIETARY_TYPES = [
+  'Veg',
+  'Non-Veg',
+  'Egg',
+  'Vegan'
 ] as const;
 
 // Difficulty levels as per API documentation
@@ -105,3 +113,4 @@ export type RecipeCategory = typeof RECIPE_CATEGORIES[number];
 export type DifficultyLevel = typeof DIFFICULTY_LEVELS[number];
 export type RecipeTag = typeof RECIPE_TAGS[number];
 export type CuisineType = typeof CUISINE_TYPES[number];
+export type DietaryType = typeof DIETARY_TYPES[number];

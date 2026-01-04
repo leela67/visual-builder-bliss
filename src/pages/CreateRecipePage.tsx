@@ -9,12 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import BottomNavigation from "@/components/BottomNavigation";
 import { Link, useNavigate } from "react-router-dom";
 import { RecipeService, type CreateRecipeRequest, type Ingredient, type Instruction } from "@/api/recipeService";
-import { RECIPE_CATEGORIES, DIFFICULTY_LEVELS, RECIPE_TAGS, CUISINE_TYPES, type RecipeCategory, type DifficultyLevel, type RecipeTag, type CuisineType } from "@/api/config";
+import { RECIPE_CATEGORIES, DIFFICULTY_LEVELS, RECIPE_TAGS, CUISINE_TYPES, DIETARY_TYPES, type RecipeCategory, type DifficultyLevel, type RecipeTag, type CuisineType, type DietaryType } from "@/api/config";
 import { toast } from "sonner";
 import InfoIconButton from "../components/ui/InfoIconButton";
 import beingHomeLogo from "/beinghomelogo.jpeg";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
+import ImageCropper from "@/components/ImageCropper";
 
 // Pre-defined options for tags
 const COMMON_TAGS = [
@@ -48,7 +49,8 @@ const CreateRecipePage = () => {
   // Form state
   const [formData, setFormData] = useState({
     name: "",
-    category: "" as RecipeCategory | "",
+    categories: [] as RecipeCategory[], // Changed from single category to array
+    dietary_type: "Veg" as DietaryType, // Added dietary_type field
     cook_time: 0,
     servings: 1,
     calories: "" as string | number, // Changed to allow empty string
@@ -60,6 +62,8 @@ const CreateRecipePage = () => {
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showImageCropper, setShowImageCropper] = useState(false);
+  const [tempImageFile, setTempImageFile] = useState<File | null>(null);
 
   const [ingredients, setIngredients] = useState<Ingredient[]>([{ name: "", quantity: "", unit: "" }]);
   const [instructions, setInstructions] = useState<Instruction[]>([{ step: 1, description: "" }]);
@@ -76,6 +80,17 @@ const CreateRecipePage = () => {
 
   const removeTag = (tagToRemove: string) => {
     updateFormData('tags', formData.tags.filter(tag => tag !== tagToRemove));
+  };
+
+  // Helper functions for categories
+  const addCategory = (category: RecipeCategory) => {
+    if (!formData.categories.includes(category)) {
+      updateFormData('categories', [...formData.categories, category]);
+    }
+  };
+
+  const removeCategory = (categoryToRemove: RecipeCategory) => {
+    updateFormData('categories', formData.categories.filter(cat => cat !== categoryToRemove));
   };
 
   const handleCustomTagAdd = () => {
@@ -145,15 +160,30 @@ const CreateRecipePage = () => {
         return;
       }
 
-      setSelectedImage(file);
-      
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+      // Show image cropper instead of directly setting the image
+      setTempImageFile(file);
+      setShowImageCropper(true);
     }
+  };
+
+  const handleCropComplete = (croppedFile: File) => {
+    setSelectedImage(croppedFile);
+    
+    // Create preview for the cropped image
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImagePreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(croppedFile);
+    
+    setShowImageCropper(false);
+    setTempImageFile(null);
+    toast.success("Image cropped successfully!");
+  };
+
+  const handleCropCancel = () => {
+    setShowImageCropper(false);
+    setTempImageFile(null);
   };
 
   const removeImage = () => {
@@ -207,8 +237,8 @@ const CreateRecipePage = () => {
       return;
     }
 
-    if (!formData.category) {
-      toast.error("Please select a category");
+    if (formData.categories.length === 0) {
+      toast.error("Please select at least one category");
       return;
     }
 
@@ -239,7 +269,8 @@ const CreateRecipePage = () => {
         
         // Add basic fields
         formDataToSend.append('name', formData.name.trim());
-        formDataToSend.append('category', formData.category);
+        formDataToSend.append('categories', JSON.stringify(formData.categories));
+        formDataToSend.append('dietary_type', formData.dietary_type);
         formDataToSend.append('cook_time', formData.cook_time.toString());
         formDataToSend.append('servings', formData.servings.toString());
         formDataToSend.append('difficulty', formData.difficulty);
@@ -280,7 +311,8 @@ const CreateRecipePage = () => {
         // Use JSON format when no image
         const recipeData: CreateRecipeRequest = {
           name: formData.name.trim(),
-          category: formData.category,
+          categories: formData.categories,
+          dietary_type: formData.dietary_type,
           youtube_url: formData.youtube_url.trim() || undefined,
           cook_time: formData.cook_time,
           servings: formData.servings,
@@ -358,15 +390,67 @@ const CreateRecipePage = () => {
             />
           </div>
 
+          {/* Categories Multi-Select */}
+          <div className="space-y-3">
+            <Label className="text-foreground font-medium flex items-center gap-2">
+              Categories *
+            </Label>
+            
+            {/* Selected Categories Display */}
+            {formData.categories.length > 0 && (
+              <div className="flex flex-wrap gap-2 p-3 bg-muted/30 rounded-md">
+                {formData.categories.map((category, index) => (
+                  <Badge
+                    key={index}
+                    variant="default"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
+                    onClick={() => removeCategory(category)}
+                  >
+                    {category}
+                    <X className="w-3 h-3 ml-1" />
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            {/* Available Categories Selection */}
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Select categories for your recipe:</p>
+              <div className="flex flex-wrap gap-2">
+                {RECIPE_CATEGORIES.map((category) => (
+                  <Badge
+                    key={category}
+                    variant={formData.categories.includes(category) ? "default" : "secondary"}
+                    className={`cursor-pointer transition-colors ${
+                      formData.categories.includes(category)
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                        : "hover:bg-secondary/80"
+                    }`}
+                    onClick={() => {
+                      if (formData.categories.includes(category)) {
+                        removeCategory(category);
+                      } else {
+                        addCategory(category);
+                      }
+                    }}
+                  >
+                    {category}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Dietary Type */}
           <div className="space-y-2">
-            <Label htmlFor="category" className="text-foreground font-medium">Category *</Label>
-            <Select value={formData.category} onValueChange={(value) => updateFormData('category', value as RecipeCategory)}>
+            <Label htmlFor="dietary_type" className="text-foreground font-medium">Dietary Type *</Label>
+            <Select value={formData.dietary_type} onValueChange={(value) => updateFormData('dietary_type', value as DietaryType)}>
               <SelectTrigger className="bg-card border-input">
-                <SelectValue placeholder="Select category" />
+                <SelectValue placeholder="Select dietary type" />
               </SelectTrigger>
               <SelectContent>
-                {RECIPE_CATEGORIES.map((category) => (
-                  <SelectItem key={category} value={category}>{category}</SelectItem>
+                {DIETARY_TYPES.map((type) => (
+                  <SelectItem key={type} value={type}>{type}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -684,6 +768,18 @@ const CreateRecipePage = () => {
           </Button>
         </form>
       </main>
+
+      {/* Image Cropper Modal */}
+      {showImageCropper && tempImageFile && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <ImageCropper
+            imageFile={tempImageFile}
+            onCropComplete={handleCropComplete}
+            onCancel={handleCropCancel}
+            aspectRatio={16 / 9} // Standard recipe image aspect ratio
+          />
+        </div>
+      )}
 
       <BottomNavigation />
     </div>

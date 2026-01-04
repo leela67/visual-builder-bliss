@@ -1,15 +1,23 @@
-import { API_BASE_URL, ApiResponse, PaginatedResponse, RecipeCategory, DifficultyLevel } from './config';
+import { API_BASE_URL, ApiResponse, PaginatedResponse, RecipeCategory, DifficultyLevel, DietaryType } from './config';
 import { AuthService } from './auth';
 
-// Recipe interfaces based on API documentation
+// Recipe interfaces based on API documentation - Updated to match actual API response
 export interface RecipeListItem {
   recipe_id: number;
   image_url: string; // Base64-encoded data URI (e.g., "data:image/jpeg;base64,...")
   name: string;
+  categories: string | null; // API returns string or null
+  dietary_type: string; // e.g., "Veg", "Non-Veg", etc.
   rating: number;
   cook_time: number;
   views: number;
   is_popular: boolean;
+  user_id: number;
+  is_admin_recipe: boolean;
+  is_active: number; // 0 or 1
+  is_approve: number; // -1, 0, or 1
+  approved_by: number | null;
+  admin_note: string | null;
 }
 
 export interface Ingredient {
@@ -26,7 +34,8 @@ export interface Instruction {
 export interface Recipe {
   recipe_id: number;
   name: string;
-  category: RecipeCategory;
+  categories: RecipeCategory[]; // Changed from single category to array
+  dietary_type: DietaryType; // Added dietary_type field
   image_url: string; // Base64-encoded data URI (e.g., "data:image/jpeg;base64,...")
   youtube_url?: string;
   cook_time: number;
@@ -47,7 +56,8 @@ export interface Recipe {
 
 export interface CreateRecipeRequest {
   name: string;
-  category: RecipeCategory;
+  categories: RecipeCategory[]; // Changed from single category to array
+  dietary_type: DietaryType; // Added dietary_type field
   image_url?: string;
   youtube_url?: string;
   cook_time: number;
@@ -341,6 +351,115 @@ export class RecipeService {
     } catch (error) {
       console.error('Failed to fetch user recipes:', error);
       throw new Error('Failed to fetch user recipes');
+    }
+  }
+  // Get current user's recipes (requires authentication)
+  static async getMyRecipes(filter: 'all' | 'approved' | 'pending' | 'rejected' = 'all', page: number = 1, limit: number = 20): Promise<ApiResponse<{
+    recipes: RecipeListItem[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      total_pages: number;
+      has_next: boolean;
+      has_prev: boolean;
+    };
+  }>> {
+    const token = AuthService.getToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    try {
+      const params = new URLSearchParams();
+      params.append('filter', filter);
+      params.append('page', page.toString());
+      params.append('limit', limit.toString());
+
+      const response = await fetch(`${API_BASE_URL}/recipes/my?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const apiResponse = await response.json();
+      
+      // Transform the API response to match expected frontend structure
+      // API returns: { success, message, data: RecipeListItem[], pagination }
+      // Frontend expects: { success, message, data: { recipes: RecipeListItem[], pagination } }
+      if (apiResponse.success && apiResponse.data) {
+        return {
+          success: apiResponse.success,
+          message: apiResponse.message,
+          data: {
+            recipes: apiResponse.data || [], // API data is the recipes array
+            pagination: apiResponse.pagination || {
+              page: page,
+              limit: limit,
+              total: 0,
+              total_pages: 0,
+              has_next: false,
+              has_prev: false
+            }
+          }
+        };
+      }
+      
+      return apiResponse;
+    } catch (error) {
+      console.error('Failed to fetch user recipes:', error);
+      throw new Error('Failed to fetch user recipes');
+    }
+  }
+
+  // Edit user recipe (requires authentication)
+  static async editRecipe(recipeId: number, recipeData: Partial<CreateRecipeRequest>): Promise<ApiResponse<Recipe>> {
+    const token = AuthService.getToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/recipes/${recipeId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(recipeData),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Failed to edit recipe:', error);
+      throw new Error('Failed to edit recipe');
+    }
+  }
+
+  // Delete user recipe (requires authentication)
+  static async deleteRecipe(recipeId: number): Promise<ApiResponse<null>> {
+    const token = AuthService.getToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/recipes/${recipeId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Failed to delete recipe:', error);
+      throw new Error('Failed to delete recipe');
     }
   }
 }
