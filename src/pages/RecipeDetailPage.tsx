@@ -18,6 +18,8 @@ import { useState, useEffect } from "react";
 import { RecipeService, type Recipe } from "@/api/recipeService";
 import { toast } from "sonner";
 import { logImageAnalysis, normalizeImageUrl } from "@/utils/imageDebugger";
+import EnhancedImage from "@/components/EnhancedImage";
+import ImageViewer from "@/components/ImageViewer";
 
 const RecipeDetailPage = () => {
   const { id } = useParams();
@@ -28,6 +30,7 @@ const RecipeDetailPage = () => {
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [issueDescription, setIssueDescription] = useState("");
   const [ratingRefreshTrigger, setRatingRefreshTrigger] = useState(0);
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
   // Helper function to convert YouTube URL to embed URL
   const getEmbedUrl = (url: string) => {
@@ -123,7 +126,7 @@ const RecipeDetailPage = () => {
       console.log("Report submitted:", {
         recipeId: recipe.recipe_id,
         recipeTitle: recipe.name,
-        category: recipe.category,
+        category: recipe.categories?.[0],
         issueDescription,
         timestamp: new Date().toISOString()
       });
@@ -169,24 +172,14 @@ const RecipeDetailPage = () => {
         <LoginIconButton />
       </div>
       <div className="relative">
-        {/* image_url contains base64-encoded data URIs (e.g., "data:image/jpeg;base64,...") */}
-        <img
-          src={normalizeImageUrl(recipe.image_url, "https://placehold.co/800x400/e2e8f0/64748b?text=Recipe+Image")}
+        {/* Enhanced image with proper loading states and click to view */}
+        <EnhancedImage
+          src={recipe.image_url}
           alt={recipe.name}
           className="w-full h-80 md:h-96 object-cover"
-          onError={(e) => {
-            const target = e.currentTarget;
-            console.error('❌ Recipe detail image failed to load', {
-              attempted_src: target.src,
-              recipe_id: recipe.recipe_id,
-              recipe_name: recipe.name,
-              original_image_url: recipe.image_url
-            });
-            // Prevent infinite loop - only set fallback once
-            if (!target.src.includes('placehold.co')) {
-              target.src = "https://placehold.co/800x400/e2e8f0/64748b?text=Recipe+Image";
-            }
-          }}
+          fallbackSrc="https://placehold.co/800x400/e2e8f0/64748b?text=Recipe+Image"
+          onClick={() => setIsImageViewerOpen(true)}
+          showLoadingSpinner={true}
         />
         <div className="absolute top-4 left-4">
           <Link to="/recipes">
@@ -204,7 +197,7 @@ const RecipeDetailPage = () => {
         <div className="mb-6">
           <div className="flex items-start justify-between mb-2">
             <h1 className="text-2xl font-bold text-foreground">{recipe.name}</h1>
-            <Badge variant="secondary">{recipe.category}</Badge>
+            <Badge variant="secondary">{recipe.categories?.[0]}</Badge>
           </div>
 
           <div className="flex items-center mt-2">
@@ -407,7 +400,7 @@ const RecipeDetailPage = () => {
               <div className="space-y-4">
                 <div className="bg-accent/20 p-3 rounded-lg text-sm">
                   <p><strong>Recipe:</strong> {recipe.name}</p>
-                  <p><strong>Category:</strong> {recipe.category}</p>
+                  <p><strong>Category:</strong> {recipe.categories?.[0]}</p>
                   <p><strong>Recipe ID:</strong> {recipe.recipe_id}</p>
                 </div>
                 
@@ -460,6 +453,14 @@ const RecipeDetailPage = () => {
       </main>
 
       <BottomNavigation />
+
+      {/* Image Viewer Modal */}
+      <ImageViewer
+        images={recipe.image_url ? [recipe.image_url] : []}
+        isOpen={isImageViewerOpen}
+        onClose={() => setIsImageViewerOpen(false)}
+        alt={recipe.name}
+      />
     </div>
   );
 };

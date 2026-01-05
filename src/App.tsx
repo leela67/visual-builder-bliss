@@ -11,6 +11,7 @@ import InfoPage from "./pages/InfoPage";
 import RecipesPage from "./pages/RecipesPage";
 import RecipeDetailPage from "./pages/RecipeDetailPage";
 import CreateRecipePage from "./pages/CreateRecipePage";
+import EditRecipePage from "./pages/EditRecipePage";
 import KBankPage from "./pages/KBankPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import TermsPage from "./pages/TermsPage";
@@ -30,6 +31,11 @@ const App = () => (
           <Route path="/" element={<HomePage />} />
           <Route path="/recipes" element={<RecipesPage />} />
           <Route path="/recipes/:id" element={<RecipeDetailPage />} />
+          <Route path="/recipes/:id/edit" element={
+            <ProtectedRoute>
+              <EditRecipePage />
+            </ProtectedRoute>
+          } />
           <Route path="/create-recipe" element={
             <ProtectedRoute>
               <CreateRecipePage />

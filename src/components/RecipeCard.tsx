@@ -3,7 +3,8 @@ import { Card } from "@/components/ui/card";
 import { Eye, Clock } from "lucide-react";
 import StarRating from "./StarRating";
 import FavoriteHeartButton from "./ui/FavoriteHeartButton";
-import { logImageAnalysis, normalizeImageUrl } from "@/utils/imageDebugger";
+import EnhancedImage from "./EnhancedImage";
+import { logImageAnalysis } from "@/utils/imageDebugger";
 
 interface RecipeCardProps {
   // Support both old and new API formats
@@ -40,31 +41,20 @@ const RecipeCard = ({
   // Debug: Analyze the image URL
   const imageAnalysis = logImageAnalysis(image_url, `RecipeCard #${recipeId} - ${recipeName}`);
 
-  // Normalize and validate the image URL
-  const recipeImage = normalizeImageUrl(image_url || image, 'https://placehold.co/400x300/e2e8f0/64748b?text=Recipe');
+  const recipeImage = image_url || image || '';
   const viewCount = views || 0;
 
   return (
     <Link to={`/recipes/${recipeId}`}>
       <Card className="overflow-hidden hover:shadow-card-hover transition-shadow duration-200 bg-card">
-        <div className="aspect-[4/3] overflow-hidden relative">
-          <img
+        <div className="relative">
+          <EnhancedImage
             src={recipeImage}
             alt={recipeName}
             className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-            onError={(e) => {
-              const target = e.currentTarget;
-              console.error('❌ RecipeCard image failed to load', {
-                attempted_src: target.src,
-                recipe_id: recipeId,
-                recipe_name: recipeName,
-                original_image_url: image_url
-              });
-              // Prevent infinite loop - only set fallback once
-              if (!target.src.includes('placehold.co')) {
-                target.src = "https://placehold.co/400x300/e2e8f0/64748b?text=Recipe";
-              }
-            }}
+            fallbackSrc="https://placehold.co/400x300/e2e8f0/64748b?text=Recipe"
+            aspectRatio="video"
+            showLoadingSpinner={false}
           />
           <FavoriteHeartButton recipeId={recipeId} />
           {is_popular && (
