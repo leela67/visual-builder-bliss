@@ -15,6 +15,7 @@ import beingHomeLogo from "/beinghomelogo.jpeg";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import ImageCropper from "@/components/ImageCropper";
+import EnhancedImageUpload from "@/components/EnhancedImageUpload";
 
 // Pre-defined options for tags
 const COMMON_TAGS = [
@@ -443,42 +444,17 @@ const EditRecipePage = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="imageFile" className="text-foreground font-medium">Recipe Image</Label>
-            <div className="space-y-3">
-              {imagePreview ? (
-                <div className="relative">
-                  <img
-                    src={imagePreview}
-                    alt="Recipe preview"
-                    className="w-full h-48 object-cover rounded-lg border border-input"
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    onClick={removeImage}
-                    className="absolute top-2 right-2"
-                  >
-                    Remove
-                  </Button>
-                </div>
-              ) : (
-                <div className="border-2 border-dashed border-input rounded-lg p-6 text-center">
-                  <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground mb-2">Upload a recipe image</p>
-                  <Input
-                    id="imageFile"
-                    type="file"
-                    accept="image/jpeg,image/jpg,image/png,image/webp,image/svg+xml"
-                    onChange={handleImageChange}
-                    className="bg-card border-input"
-                  />
-                </div>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Supported formats: JPEG, PNG, WebP, SVG. Maximum size: 5MB
-            </p>
+            <Label className="text-foreground font-medium">Recipe Image</Label>
+            <EnhancedImageUpload
+              onImageSelect={(file, preview) => {
+                setTempImageFile(file);
+                setShowImageCropper(true);
+              }}
+              currentImage={imagePreview}
+              onRemoveImage={removeImage}
+              maxSizeMB={5}
+              acceptedFormats={['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/svg+xml']}
+            />
           </div>
 
           <div className="space-y-2">

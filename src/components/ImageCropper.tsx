@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
@@ -20,6 +20,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+  const blobUrlRef = useRef<string | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [crop, setCrop] = useState({
     x: 0,
@@ -31,7 +32,28 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
-  const imageUrl = URL.createObjectURL(imageFile);
+  // Create stable blob URL using useMemo to prevent recreation on re-renders
+  const imageUrl = useMemo(() => {
+    // Clean up previous blob URL
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current);
+    }
+    
+    // Create new blob URL
+    const url = URL.createObjectURL(imageFile);
+    blobUrlRef.current = url;
+    return url;
+  }, [imageFile]);
+
+  // Cleanup blob URL on unmount
+  useEffect(() => {
+    return () => {
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
+    };
+  }, []);
 
   const handleImageLoad = useCallback(() => {
     const img = imageRef.current;
