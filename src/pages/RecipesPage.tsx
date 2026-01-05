@@ -7,14 +7,16 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import BottomNavigation from "@/components/BottomNavigation";
 import RecipeCard from "@/components/RecipeCard";
-import { Link, useSearchParams } from "react-router-dom";
-import { RecipeService, type RecipeListItem } from "@/api/recipeService";
+import RandomRecipeModal from "@/components/RandomRecipeModal";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { RecipeService, type RecipeListItem, type RandomRecipeResponse } from "@/api/recipeService";
 import { RECIPE_CATEGORIES, type RecipeCategory } from "@/api/config";
 import { toast } from "sonner";
 import beingHomeLogo from "/beinghomelogo.jpeg";
 
 const RecipesPage = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [recipes, setRecipes] = useState<RecipeListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -23,6 +25,11 @@ const RecipesPage = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Random recipe modal state
+  const [isRandomModalOpen, setIsRandomModalOpen] = useState(false);
+  const [randomRecipe, setRandomRecipe] = useState<RandomRecipeResponse | null>(null);
+  const [isLoadingRandom, setIsLoadingRandom] = useState(false);
 
   const categories = ["All", ...RECIPE_CATEGORIES];
   const dietaryTypes = ["All", "Veg", "Non-Veg", "Egg", "Vegan"];
@@ -62,6 +69,44 @@ const RecipesPage = () => {
 
   const handleSearch = () => {
     fetchRecipes();
+  };
+
+  // Random recipe modal handlers
+  const handleWhatToCook = async () => {
+    setIsRandomModalOpen(true);
+    await fetchRandomRecipe();
+  };
+
+  const fetchRandomRecipe = async () => {
+    setIsLoadingRandom(true);
+    try {
+      const response = await RecipeService.getRandomRecipe();
+      if (response.success && response.data) {
+        setRandomRecipe(response.data);
+      } else {
+        toast.error("Failed to get random recipe");
+      }
+    } catch (error) {
+      console.error('Error fetching random recipe:', error);
+      toast.error("Failed to get random recipe");
+    } finally {
+      setIsLoadingRandom(false);
+    }
+  };
+
+  const handleStartCooking = (recipeId: number) => {
+    setIsRandomModalOpen(false);
+    navigate(`/recipes/${recipeId}`);
+  };
+
+  const handleTryAnother = async () => {
+    setRandomRecipe(null);
+    await fetchRandomRecipe();
+  };
+
+  const handleCloseModal = () => {
+    setIsRandomModalOpen(false);
+    setRandomRecipe(null);
   };
 
   useEffect(() => {
@@ -316,9 +361,10 @@ const RecipesPage = () => {
         
         {/* What to Cook Button */}
         <Button
+          onClick={handleWhatToCook}
           className={`py-3 bg-primary text-primary-foreground font-semibold shadow-xl border-0 hover:scale-105 active:scale-95 transition-all duration-300 ease-in-out rounded-full touch-manipulation ${
-            isExpanded 
-              ? 'gap-2 px-4 min-w-[140px] sm:min-w-[160px] justify-start' 
+            isExpanded
+              ? 'gap-2 px-4 min-w-[140px] sm:min-w-[160px] justify-start'
               : 'w-14 h-14 p-0 min-w-0 justify-center items-center'
           }`}
         >
@@ -330,6 +376,16 @@ const RecipesPage = () => {
           </span>
         </Button>
       </div>
+
+      {/* Random Recipe Modal */}
+      <RandomRecipeModal
+        isOpen={isRandomModalOpen}
+        onClose={handleCloseModal}
+        recipe={randomRecipe}
+        isLoading={isLoadingRandom}
+        onStartCooking={handleStartCooking}
+        onTryAnother={handleTryAnother}
+      />
 
       {/* Bottom Navigation Bar */}
       <BottomNavigation />
