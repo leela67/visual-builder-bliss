@@ -4,6 +4,7 @@ import { Search, ArrowLeft, ChefHat, Plus, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import BottomNavigation from "@/components/BottomNavigation";
 import RecipeCard from "@/components/RecipeCard";
 import { Link, useSearchParams } from "react-router-dom";
@@ -17,18 +18,19 @@ const RecipesPage = () => {
   const [recipes, setRecipes] = useState<RecipeListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [isVegOnly, setIsVegOnly] = useState<boolean>(false);
+  const [selectedDietaryType, setSelectedDietaryType] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [isExpanded, setIsExpanded] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const categories = ["All", ...RECIPE_CATEGORIES];
+  const dietaryTypes = ["All", "Veg", "Non-Veg", "Egg", "Vegan"];
   
   // Fetch recipes based on current filters
   useEffect(() => {
     fetchRecipes();
-  }, [selectedCategory, isVegOnly, searchQuery]);
+  }, [selectedCategory, selectedDietaryType, searchQuery]);
 
   const fetchRecipes = async () => {
     try {
@@ -38,7 +40,7 @@ const RecipesPage = () => {
       const response = await RecipeService.searchRecipes({
         search: searchQuery.trim() || undefined,
         meal_type: selectedCategory !== "All" ? selectedCategory as RecipeCategory : undefined,
-        veg: isVegOnly || undefined,
+        dietary_type: selectedDietaryType !== "All" ? selectedDietaryType : undefined,
         page: 1,
         limit: 20
       });
@@ -186,66 +188,68 @@ const RecipesPage = () => {
               />
             </div>
             
-            {/* Veg/Non-Veg iOS Toggle */}
-            <label className="form-switch flex items-center cursor-pointer flex-shrink-0 touch-manipulation">
-              <span className="mr-2 text-xs sm:text-sm font-medium text-foreground">
-                {isVegOnly ? 'Veg' : 'All'}
-              </span>
-              <input
-                type="checkbox"
-                checked={isVegOnly}
-                onChange={(e) => setIsVegOnly(e.target.checked)}
-                className="sr-only"
-              />
-              <div className="relative inline-block w-10 h-6 bg-gray-300 rounded-full transition-colors duration-300 ease-in-out">
-                <div
-                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${
-                    isVegOnly ? 'translate-x-4 bg-white' : 'translate-x-0'
-                  }`}
-                >
-                  <div className={`w-full h-full rounded-full flex items-center justify-center ${
-                    isVegOnly ? 'bg-green-600' : 'bg-red-600'
-                  }`}>
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
-                  </div>
-                </div>
-                <div
-                  className={`absolute inset-0 rounded-full transition-colors duration-300 ease-in-out ${
-                    isVegOnly ? 'bg-green-600' : 'bg-gray-300'
-                  }`}
-                ></div>
-              </div>
-              {/* Indian Veg/Non-Veg Symbols */}
-              <div className="ml-2 flex items-center">
-                {isVegOnly ? (
-                  <div className="w-4 h-4 border-2 border-green-600 bg-white flex items-center justify-center">
-                    <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                  </div>
-                ) : (
-                  <div className="w-4 h-4 border-2 border-red-600 bg-white flex items-center justify-center">
-                    <div className="w-2 h-2 bg-red-600 rounded-full"></div>
-                  </div>
-                )}
-              </div>
-            </label>
+            {/* Dietary Preference Dropdown */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Select value={selectedDietaryType} onValueChange={setSelectedDietaryType}>
+                <SelectTrigger className="w-32 h-8 text-xs">
+                  <SelectValue placeholder="Diet" />
+                </SelectTrigger>
+                <SelectContent>
+                  {dietaryTypes.map((type) => (
+                    <SelectItem key={type} value={type} className="text-xs">
+                      <div className="flex items-center gap-2">
+                        {type === "Veg" && (
+                          <div className="w-3 h-3 border border-green-600 bg-white flex items-center justify-center">
+                            <div className="w-1.5 h-1.5 bg-green-600 rounded-full"></div>
+                          </div>
+                        )}
+                        {type === "Non-Veg" && (
+                          <div className="w-3 h-3 border border-red-600 bg-white flex items-center justify-center">
+                            <div className="w-1.5 h-1.5 bg-red-600 rounded-full"></div>
+                          </div>
+                        )}
+                        {type === "Vegan" && (
+                          <div className="w-3 h-3 border border-green-700 bg-white flex items-center justify-center">
+                            <div className="w-1.5 h-1.5 bg-green-700 rounded-full"></div>
+                          </div>
+                        )}
+                        {type === "Egg" && (
+                          <div className="w-3 h-3 border border-yellow-600 bg-white flex items-center justify-center">
+                            <div className="w-1.5 h-1.5 bg-yellow-600 rounded-full"></div>
+                          </div>
+                        )}
+                        <span>{type}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            {categories.map((category) => (
-              <Badge
-                key={category}
-                variant={selectedCategory === category ? "default" : "secondary"}
-                className={`cursor-pointer whitespace-nowrap transition-colors ${
-                  selectedCategory === category 
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90" 
-                    : "hover:bg-secondary/80"
-                }`}
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category}
-              </Badge>
-            ))}
+          {/* Category Filter */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium text-foreground">Categories</h3>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {categories.map((category) => (
+                <Badge
+                  key={category}
+                  variant={selectedCategory === category ? "default" : "secondary"}
+                  className={`cursor-pointer whitespace-nowrap transition-colors ${
+                    selectedCategory === category
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                      : "hover:bg-secondary/80"
+                  }`}
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {category}
+                </Badge>
+              ))}
+            </div>
           </div>
+
         </div>
       </header>
 

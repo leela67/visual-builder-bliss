@@ -16,6 +16,7 @@ import beingHomeLogo from "/beinghomelogo.jpeg";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import ImageCropper from "@/components/ImageCropper";
+import IngredientInput from "@/components/IngredientInput";
 
 // Pre-defined options for tags
 const COMMON_TAGS = [
@@ -100,15 +101,6 @@ const CreateRecipePage = () => {
     }
   };
 
-  const addIngredient = () => {
-    setIngredients([...ingredients, { name: "", quantity: "", unit: "" }]);
-  };
-
-  const removeIngredient = (index: number) => {
-    if (ingredients.length > 1) {
-      setIngredients(ingredients.filter((_, i) => i !== index));
-    }
-  };
 
   const addInstruction = () => {
     const newStep = instructions.length + 1;
@@ -124,11 +116,6 @@ const CreateRecipePage = () => {
     }
   };
 
-  const updateIngredient = (index: number, field: keyof Ingredient, value: string) => {
-    const updated = [...ingredients];
-    updated[index] = { ...updated[index], [field]: value };
-    setIngredients(updated);
-  };
 
   const updateInstruction = (index: number, value: string) => {
     const updated = [...instructions];
@@ -581,54 +568,11 @@ const CreateRecipePage = () => {
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-foreground">Ingredients *</h3>
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
-                onClick={addIngredient}
-                className="gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Add
-              </Button>
-            </div>
-            <div className="space-y-3">
-              {ingredients.map((ingredient, index) => (
-                <div key={index} className="flex gap-2">
-                  <Input
-                    placeholder="Ingredient name"
-                    value={ingredient.name}
-                    onChange={(e) => updateIngredient(index, 'name', e.target.value)}
-                    className="bg-card border-input flex-1"
-                  />
-                  <Input
-                    placeholder="Qty"
-                    value={ingredient.quantity}
-                    onChange={(e) => updateIngredient(index, 'quantity', e.target.value)}
-                    className="bg-card border-input w-20"
-                  />
-                  <Input
-                    placeholder="Unit"
-                    value={ingredient.unit}
-                    onChange={(e) => updateIngredient(index, 'unit', e.target.value)}
-                    className="bg-card border-input w-20"
-                  />
-                  {ingredients.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeIngredient(index)}
-                      className="px-2"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
+            <h3 className="text-lg font-semibold text-foreground">Ingredients *</h3>
+            <IngredientInput
+              ingredients={ingredients}
+              onChange={setIngredients}
+            />
           </div>
 
           <div className="space-y-4">

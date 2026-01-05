@@ -200,6 +200,13 @@ const RecipeDetailPage = () => {
             <Badge variant="secondary">{recipe.categories?.[0]}</Badge>
           </div>
 
+          {/* Recipe Owner */}
+          <div className="mb-3">
+            <p className="text-sm text-muted-foreground">
+              Created by <span className="font-medium text-foreground">{recipe.owner_name}</span>
+            </p>
+          </div>
+
           <div className="flex items-center mt-2">
             <div className="flex items-center gap-4">
               <StarRating rating={recipe.rating || 0} showNumber />

@@ -50,6 +50,7 @@ export interface Recipe {
   views: number;
   is_popular: boolean;
   user_id: number;
+  owner_name: string;
   created_at: string;
   updated_at: string;
 }
@@ -73,7 +74,8 @@ export interface CreateRecipeRequest {
 export interface SearchFilters {
   search?: string;
   meal_type?: RecipeCategory;
-  veg?: boolean;
+  veg?: boolean; // Keep for backward compatibility
+  dietary_type?: string; // New dietary type filter: "Veg", "Non-Veg", "Egg", "Vegan"
   page?: number;
   limit?: number;
 }
@@ -143,6 +145,7 @@ export class RecipeService {
       if (filters.search) params.append('search', filters.search);
       if (filters.meal_type) params.append('meal_type', filters.meal_type);
       if (filters.veg !== undefined) params.append('veg', filters.veg.toString());
+      if (filters.dietary_type) params.append('dietary_type', filters.dietary_type);
       if (filters.page) params.append('page', filters.page.toString());
       if (filters.limit) params.append('limit', filters.limit.toString());
 
