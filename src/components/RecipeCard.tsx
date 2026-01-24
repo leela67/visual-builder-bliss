@@ -16,6 +16,7 @@ interface RecipeCardProps {
   image_url?: string;
   rating: number;
   category?: string;
+  categories?: string[];
   cook_time?: number;
   views?: number;
   is_popular?: boolean;
@@ -30,6 +31,7 @@ const RecipeCard = ({
   image_url,
   rating,
   category,
+  categories,
   cook_time,
   views,
   is_popular
@@ -51,6 +53,13 @@ const RecipeCard = ({
   }
 
   const viewCount = views || 0;
+
+  // Determine which categories to display
+  const displayCategories = categories && categories.length > 0
+    ? categories
+    : category
+    ? [category]
+    : [];
 
   return (
     <Link to={`/recipes/${recipeId}`}>
@@ -87,10 +96,19 @@ const RecipeCard = ({
                 {cook_time} min
               </div>
             )}
-            {category && (
-              <span className="inline-block px-2 py-1 text-xs bg-accent text-accent-foreground rounded-full">
-                {category}
-              </span>
+            {displayCategories.length > 0 && (
+              <div className="flex flex-wrap gap-1 justify-end">
+                {displayCategories.slice(0, 2).map((cat, index) => (
+                  <span key={index} className="inline-block px-2 py-1 text-xs bg-accent text-accent-foreground rounded-full">
+                    {cat}
+                  </span>
+                ))}
+                {displayCategories.length > 2 && (
+                  <span className="inline-block px-2 py-1 text-xs bg-accent text-accent-foreground rounded-full">
+                    +{displayCategories.length - 2}
+                  </span>
+                )}
+              </div>
             )}
           </div>
         </div>

@@ -470,14 +470,22 @@ const ProfilePage = () => {
                           )}
                         </div>
                         
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
                           <Badge variant="outline" className="text-xs">
                             {recipe.dietary_type}
                           </Badge>
                           {recipe.categories && (
-                            <Badge variant="outline" className="text-xs">
-                              {recipe.categories}
-                            </Badge>
+                            Array.isArray(recipe.categories) ? (
+                              recipe.categories.map((category, index) => (
+                                <Badge key={index} variant="outline" className="text-xs">
+                                  {category}
+                                </Badge>
+                              ))
+                            ) : (
+                              <Badge variant="outline" className="text-xs">
+                                {recipe.categories}
+                              </Badge>
+                            )
                           )}
                         </div>
                         

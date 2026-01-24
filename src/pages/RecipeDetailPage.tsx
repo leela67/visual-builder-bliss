@@ -200,7 +200,15 @@ const RecipeDetailPage = () => {
         <div className="mb-6">
           <div className="flex items-start justify-between mb-2">
             <h1 className="text-2xl font-bold text-foreground">{recipe.name}</h1>
-            <Badge variant="secondary">{recipe.categories?.[0]}</Badge>
+            <div className="flex flex-wrap gap-2 justify-end">
+              {recipe.categories && recipe.categories.length > 0 ? (
+                recipe.categories.map((category, index) => (
+                  <Badge key={index} variant="secondary">{category}</Badge>
+                ))
+              ) : (
+                <Badge variant="secondary">Uncategorized</Badge>
+              )}
+            </div>
           </div>
 
           {/* Recipe Owner */}
