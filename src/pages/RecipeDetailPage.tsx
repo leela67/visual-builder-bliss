@@ -173,23 +173,26 @@ const RecipeDetailPage = () => {
       </div>
       <div className="relative">
         {/* Enhanced image with proper loading states and click to view */}
-        <EnhancedImage
-          src={recipe.image_url}
-          alt={recipe.name}
-          className="w-full h-80 md:h-96 object-cover"
-          fallbackSrc="https://placehold.co/800x400/e2e8f0/64748b?text=Recipe+Image"
-          onClick={() => setIsImageViewerOpen(true)}
-          showLoadingSpinner={true}
-        />
-        <div className="absolute top-4 left-4">
-          <Link to="/recipes">
-            <Button variant="secondary" size="sm" className="bg-card/80 backdrop-blur-sm">
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-          </Link>
-        </div>
-        <div className="absolute top-4 right-4">
-          <FavoriteHeartButton recipeId={recipe.recipe_id.toString()} />
+        <div className="relative w-full">
+          <EnhancedImage
+            src={recipe.image_url}
+            alt={recipe.name}
+            className="w-full h-full object-cover cursor-pointer hover:opacity-95 transition-opacity duration-200"
+            fallbackSrc="https://placehold.co/800x400/e2e8f0/64748b?text=Recipe+Image"
+            onClick={() => setIsImageViewerOpen(true)}
+            showLoadingSpinner={true}
+            aspectRatio="video"
+          />
+          <div className="absolute top-4 left-4 z-10">
+            <Link to="/recipes">
+              <Button variant="secondary" size="sm" className="bg-card/80 backdrop-blur-sm hover:bg-card">
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
+          <div className="absolute top-4 right-4 z-10">
+            <FavoriteHeartButton recipeId={recipe.recipe_id.toString()} />
+          </div>
         </div>
       </div>
 
