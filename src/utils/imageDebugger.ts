@@ -185,7 +185,8 @@ export function validateBase64Image(base64String: string): boolean {
  * Converts a potentially malformed image URL to a valid format
  */
 export function normalizeImageUrl(imageUrl: string | undefined | null, fallback: string = 'https://placehold.co/400x300/e2e8f0/64748b?text=No+Image'): string {
-  if (!imageUrl) {
+  // Handle empty/null/undefined
+  if (!imageUrl || imageUrl.trim() === '') {
     console.warn('⚠️ Image URL is empty, using fallback');
     return fallback;
   }
@@ -194,15 +195,40 @@ export function normalizeImageUrl(imageUrl: string | undefined | null, fallback:
 
   // Check for MIME type mismatch in data URIs
   if (imageUrl.startsWith('data:image/') && imageUrl.includes('base64,')) {
-    const base64Content = imageUrl.split(',')[1];
+    const parts = imageUrl.split(',');
+    if (parts.length !== 2) {
+      console.error('❌ Invalid data URI format (missing comma separator), using fallback');
+      return fallback;
+    }
+
+    const base64Content = parts[1];
+    if (!base64Content || base64Content.trim() === '') {
+      console.error('❌ Data URI has no base64 content, using fallback');
+      return fallback;
+    }
+
+    // Check for suspiciously short base64 content (likely a 1x1 pixel or corrupted)
+    if (base64Content.length < 200) {
+      console.warn(`⚠️ Base64 content is very short (${base64Content.length} chars), likely a placeholder or corrupted image, using fallback`);
+      return fallback;
+    }
+
     const declaredType = imageUrl.match(/data:image\/([^;]+)/)?.[1];
     const actualType = detectActualImageType(base64Content);
 
-    if (actualType && declaredType !== actualType) {
+    if (actualType && declaredType && declaredType !== actualType) {
       console.warn(`⚠️ MIME type mismatch detected! Declared: ${declaredType}, Actual: ${actualType}`);
       console.log('🔧 Fixing MIME type...');
       const fixed = `data:image/${actualType};base64,${base64Content}`;
+      console.log('✅ Fixed URL created, length:', fixed.length);
       return fixed;
+    }
+
+    // Validate base64 content is properly formatted
+    const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+    if (!base64Regex.test(base64Content)) {
+      console.error('❌ Base64 content contains invalid characters, using fallback');
+      return fallback;
     }
   }
 
@@ -217,6 +243,17 @@ export function normalizeImageUrl(imageUrl: string | undefined | null, fallback:
     console.warn('⚠️ Image URL contains base64 but missing data URI prefix, attempting to fix...');
     // Try to detect image type from the content or default to jpeg
     const base64Content = imageUrl.replace(/^base64,/, '');
+    if (!base64Content || base64Content.trim() === '') {
+      console.error('❌ No base64 content found after removing prefix, using fallback');
+      return fallback;
+    }
+    
+    // Check for suspiciously short base64 content
+    if (base64Content.length < 200) {
+      console.warn(`⚠️ Base64 content is very short (${base64Content.length} chars), using fallback`);
+      return fallback;
+    }
+    
     const actualType = detectActualImageType(base64Content) || 'jpeg';
     const fixed = `data:image/${actualType};base64,${base64Content}`;
     console.log('🔧 Fixed image URL with detected type:', actualType);

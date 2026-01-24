@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { normalizeImageUrl } from '@/utils/imageDebugger';
 
 interface EnhancedImageProps {
@@ -22,18 +22,41 @@ const EnhancedImage: React.FC<EnhancedImageProps> = ({
   showLoadingSpinner = true,
   aspectRatio = 'auto'
 }) => {
+  // Normalize the image URL synchronously using useMemo to avoid race conditions
+  const normalizedSrc = useMemo(() => {
+    console.log('🖼️ EnhancedImage: Processing image', {
+      original_src: src?.substring(0, 100),
+      src_length: src?.length,
+      fallback: fallbackSrc
+    });
+    
+    const normalized = normalizeImageUrl(src, fallbackSrc);
+    
+    console.log('🖼️ EnhancedImage: Normalized result', {
+      normalized_src: normalized?.substring(0, 100),
+      normalized_length: normalized?.length,
+      is_fallback: normalized === fallbackSrc
+    });
+    
+    if (!normalized || normalized.trim() === '') {
+      console.error('❌ EnhancedImage: normalizeImageUrl returned empty string, using fallback');
+      return fallbackSrc;
+    }
+    
+    return normalized;
+  }, [src, fallbackSrc]);
+
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [currentSrc, setCurrentSrc] = useState('');
+  const [currentSrc, setCurrentSrc] = useState(normalizedSrc);
   const imgRef = useRef<HTMLImageElement>(null);
 
-  // Normalize the image URL when src changes
+  // Update currentSrc when normalizedSrc changes
   useEffect(() => {
-    const normalizedSrc = normalizeImageUrl(src, fallbackSrc);
     setCurrentSrc(normalizedSrc);
     setIsLoading(true);
     setHasError(false);
-  }, [src, fallbackSrc]);
+  }, [normalizedSrc]);
 
   const handleLoad = () => {
     setIsLoading(false);
@@ -42,17 +65,25 @@ const EnhancedImage: React.FC<EnhancedImageProps> = ({
 
   const handleError = () => {
     console.error('❌ Enhanced image failed to load', {
-      attempted_src: currentSrc,
-      original_src: src,
-      alt
+      attempted_src: currentSrc?.substring(0, 100),
+      attempted_src_length: currentSrc?.length,
+      normalized_src: normalizedSrc?.substring(0, 100),
+      normalized_src_length: normalizedSrc?.length,
+      original_src: src?.substring(0, 100),
+      original_src_length: src?.length,
+      alt,
+      is_fallback: currentSrc === fallbackSrc
     });
     
     setIsLoading(false);
     
     // Only set fallback if we haven't already tried it
     if (!hasError && !currentSrc.includes('placehold.co')) {
+      console.warn('⚠️ Attempting fallback image...');
       setHasError(true);
       setCurrentSrc(fallbackSrc);
+    } else if (hasError) {
+      console.error('❌ Fallback image also failed to load');
     }
   };
 

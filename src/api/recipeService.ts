@@ -189,6 +189,20 @@ export class RecipeService {
       });
 
       const data = await response.json();
+
+      // Debug: Log sample recipe from popular recipes
+      if (data.data && data.data.length > 0) {
+        console.log('📡 API Response for getPopularRecipes (first recipe):', {
+          recipe_id: data.data[0]?.recipe_id,
+          image_url_exists: !!data.data[0]?.image_url,
+          image_url_type: typeof data.data[0]?.image_url,
+          image_url_length: data.data[0]?.image_url?.length,
+          image_url_first_100_chars: data.data[0]?.image_url?.substring(0, 100),
+          is_data_uri: data.data[0]?.image_url?.startsWith('data:'),
+          total_recipes: data.data.length
+        });
+      }
+
       return data;
     } catch (error) {
       console.error('Failed to fetch popular recipes:', error);
@@ -388,6 +402,19 @@ export class RecipeService {
       });
 
       const apiResponse = await response.json();
+      
+      // Debug: Log sample recipe from user recipes
+      if (apiResponse.success && apiResponse.data && apiResponse.data.length > 0) {
+        console.log('📡 API Response for getMyRecipes (first recipe):', {
+          recipe_id: apiResponse.data[0]?.recipe_id,
+          image_url_exists: !!apiResponse.data[0]?.image_url,
+          image_url_type: typeof apiResponse.data[0]?.image_url,
+          image_url_length: apiResponse.data[0]?.image_url?.length,
+          image_url_first_100_chars: apiResponse.data[0]?.image_url?.substring(0, 100),
+          is_data_uri: apiResponse.data[0]?.image_url?.startsWith('data:'),
+          total_recipes: apiResponse.data.length
+        });
+      }
       
       // Transform the API response to match expected frontend structure
       // API returns: { success, message, data: RecipeListItem[], pagination }

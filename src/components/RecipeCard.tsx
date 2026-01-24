@@ -38,10 +38,18 @@ const RecipeCard = ({
   const recipeId = recipe_id?.toString() || id || '';
   const recipeName = name || title || '';
 
-  // Debug: Analyze the image URL
-  const imageAnalysis = logImageAnalysis(image_url, `RecipeCard #${recipeId} - ${recipeName}`);
+  // Determine the image URL, filtering out empty strings
+  const recipeImage = (image_url && image_url.trim() !== '') ? image_url :
+                      (image && image.trim() !== '') ? image :
+                      '';
 
-  const recipeImage = image_url || image || '';
+  // Debug: Analyze the image URL only if it exists
+  if (recipeImage) {
+    logImageAnalysis(recipeImage, `RecipeCard #${recipeId} - ${recipeName}`);
+  } else {
+    console.warn(`⚠️ RecipeCard #${recipeId} - ${recipeName}: No image URL provided, will use fallback`);
+  }
+
   const viewCount = views || 0;
 
   return (
