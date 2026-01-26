@@ -17,12 +17,49 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [phoneError, setPhoneError] = useState("");
+
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    // Only allow numeric characters
+    if (value && !/^\d*$/.test(value)) {
+      setPhoneError("Only numeric characters (0-9) are allowed");
+      return;
+    }
+    
+    // Limit to 10 digits
+    if (value.length > 10) {
+      setPhoneError("Phone number cannot exceed 10 digits");
+      return;
+    }
+    
+    setPhoneNumber(value);
+    
+    // Clear error if input is valid
+    if (value.length === 0) {
+      setPhoneError("");
+    } else if (value.length < 10) {
+      setPhoneError("Phone number must be exactly 10 digits");
+    } else if (value.length === 10) {
+      setPhoneError("");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!phoneNumber.trim() || !password.trim()) {
       toast.error("Please fill in all fields", {
+        position: "top-center",
+        duration: 4000,
+      });
+      return;
+    }
+
+    // Validate phone number is exactly 10 digits
+    if (phoneNumber.length !== 10) {
+      toast.error("Phone number must be exactly 10 digits", {
         position: "top-center",
         duration: 4000,
       });
@@ -91,15 +128,20 @@ export default function LoginPage() {
                   type="tel"
                   placeholder="Enter phone number"
                   value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  onChange={handlePhoneNumberChange}
                   required
                   disabled={isLoading}
-                  className="flex-1"
+                  className={`flex-1 ${phoneError ? "border-red-500" : ""}`}
+                  maxLength={10}
                 />
               </div>
-              <p className="text-xs text-muted-foreground">
-                Enter your phone number without the country code
-              </p>
+              {phoneError ? (
+                <p className="text-xs text-red-500">{phoneError}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Enter your 10-digit phone number without the country code
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">

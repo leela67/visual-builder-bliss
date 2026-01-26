@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, User, Phone, Heart, LogOut, Edit, Save, X, Bell, BellDot, Trash2, Eye, EyeOff, ChefHat, Clock, Users } from "lucide-react";
+import { ArrowLeft, User, Phone, Heart, LogOut, Edit, Save, X, Bell, BellDot, Trash2, Eye, EyeOff, ChefHat, Clock, Users, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import { RecipeService, type RecipeListItem } from "@/api/recipeService";
 import { NotificationService, type Notification } from "@/api/notificationService";
 import { toast } from "sonner";
 import BottomNavigation from "@/components/BottomNavigation";
+import YouTubeShortsCarousel from "@/components/YouTubeShortsCarousel";
 import type { User as UserType } from "@/api/auth";
 
 const AVAILABLE_INTERESTS = [
@@ -179,9 +180,19 @@ const ProfilePage = () => {
   };
 
   const handleLogout = () => {
+    // Clear all authentication data
     AuthService.logout();
+    
+    // Clear any other app-specific data if needed
+    sessionStorage.clear();
+    
     toast.success("Logged out successfully");
-    navigate("/login");
+    
+    // Use replace to prevent back navigation
+    navigate("/login", { replace: true });
+    
+    // Force a page reload to clear any cached state
+    window.location.href = "/login";
   };
 
   const toggleInterest = (interest: string) => {
@@ -235,11 +246,27 @@ const ProfilePage = () => {
               <h1 className="text-xl font-semibold text-foreground">Profile</h1>
             </div>
             <div className="flex items-center gap-2">
-              {unreadCount > 0 && (
-                <Badge variant="destructive" className="text-xs">
-                  {unreadCount}
-                </Badge>
-              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveTab("notifications")}
+                className="relative p-2"
+                title="Notifications"
+              >
+                {unreadCount > 0 ? (
+                  <BellDot className="w-5 h-5 text-primary" />
+                ) : (
+                  <Bell className="w-5 h-5 text-foreground" />
+                )}
+                {unreadCount > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                  >
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </Badge>
+                )}
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -257,18 +284,23 @@ const ProfilePage = () => {
       {/* Profile Content */}
       <main className="px-4 py-6 max-w-4xl mx-auto">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile" className="gap-2">
               <User className="w-4 h-4" />
-              Profile
+              <span className="hidden sm:inline">Profile</span>
             </TabsTrigger>
             <TabsTrigger value="recipes" className="gap-2">
               <ChefHat className="w-4 h-4" />
-              My Recipes ({userRecipes?.length || 0})
+              <span className="hidden sm:inline">Recipes</span>
+              <span className="sm:hidden">({userRecipes?.length || 0})</span>
+            </TabsTrigger>
+            <TabsTrigger value="shorts" className="gap-2">
+              <Video className="w-4 h-4" />
+              <span className="hidden sm:inline">Shorts</span>
             </TabsTrigger>
             <TabsTrigger value="notifications" className="gap-2">
               {unreadCount > 0 ? <BellDot className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
-              Notifications
+              <span className="hidden sm:inline">Alerts</span>
               {unreadCount > 0 && (
                 <Badge variant="destructive" className="ml-1 text-xs">
                   {unreadCount}
@@ -604,6 +636,11 @@ const ProfilePage = () => {
                 </div>
               )}
             </div>
+          </TabsContent>
+
+          {/* YouTube Shorts Tab */}
+          <TabsContent value="shorts" className="mt-6">
+            <YouTubeShortsCarousel />
           </TabsContent>
         </Tabs>
       </main>

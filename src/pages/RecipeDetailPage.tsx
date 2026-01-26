@@ -1,6 +1,4 @@
 import { ArrowLeft, Clock, Users, Youtube, Share2, Eye, Plus, Minus, AlertTriangle, Loader2, ChefHat } from "lucide-react";
-import InfoIconButton from "../components/ui/InfoIconButton";
-import LoginIconButton from "../components/ui/LoginIconButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -166,11 +164,7 @@ const RecipeDetailPage = () => {
 
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-6" style={{ position: "relative" }}>
-      <div style={{ position: "absolute", top: 16, right: 16, display: "flex", flexDirection: "row", zIndex: 50 }}>
-        <InfoIconButton />
-        <LoginIconButton />
-      </div>
+    <div className="min-h-screen bg-background pb-20 md:pb-6">
       <div className="relative">
         {/* Enhanced image with proper loading states and click to view */}
         <div className="relative w-full">
