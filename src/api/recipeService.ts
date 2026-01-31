@@ -469,6 +469,31 @@ export class RecipeService {
     }
   }
 
+  // Edit recipe with FormData (for file uploads)
+  static async editRecipeWithFormData(recipeId: number, formData: FormData): Promise<ApiResponse<Recipe>> {
+    const token = AuthService.getToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/recipes/${recipeId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          // Don't set Content-Type for FormData - browser will set it with boundary
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Failed to edit recipe with FormData:', error);
+      throw new Error('Failed to edit recipe');
+    }
+  }
+
   // Delete user recipe (requires authentication)
   static async deleteRecipe(recipeId: number): Promise<ApiResponse<null>> {
     const token = AuthService.getToken();

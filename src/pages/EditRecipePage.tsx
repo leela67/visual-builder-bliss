@@ -278,33 +278,68 @@ const EditRecipePage = () => {
     setIsSubmitting(true);
 
     try {
-      // Prepare recipe data for update
-      const recipeData: Partial<CreateRecipeRequest> = {
-        name: formData.name.trim(),
-        categories: formData.categories,
-        dietary_type: formData.dietary_type,
-        youtube_url: formData.youtube_url.trim() || undefined,
-        cook_time: formData.cook_time,
-        servings: formData.servings,
-        difficulty: formData.difficulty,
-        cuisine: formData.cuisine || "Other",
-        calories: typeof formData.calories === 'number' ? formData.calories : parseInt(formData.calories) || 0,
-        tags: formData.tags,
-        ingredients: filteredIngredients,
-        instructions: filteredInstructions
-      };
+      // Use FormData for multipart form submission when a new image is selected
+      if (selectedImage) {
+        const formDataToSend = new FormData();
+        
+        // Add basic fields
+        formDataToSend.append('name', formData.name.trim());
+        formDataToSend.append('categories', JSON.stringify(formData.categories));
+        formDataToSend.append('dietary_type', formData.dietary_type);
+        formDataToSend.append('cook_time', formData.cook_time.toString());
+        formDataToSend.append('servings', formData.servings.toString());
+        formDataToSend.append('difficulty', formData.difficulty);
+        formDataToSend.append('cuisine', formData.cuisine || "Other");
+        formDataToSend.append('calories', (typeof formData.calories === 'number' ? formData.calories : parseInt(formData.calories) || 0).toString());
 
-      // If there's a new image, we need to handle it separately
-      // For now, we'll just update the recipe data without the image
-      // TODO: Implement image update functionality if needed
+        // Add optional fields
+        if (formData.youtube_url.trim()) {
+          formDataToSend.append('youtube_url', formData.youtube_url.trim());
+        }
+        if (formData.tags.length > 0) {
+          formDataToSend.append('tags', JSON.stringify(formData.tags));
+        }
+        
+        // Add the new image file
+        formDataToSend.append('image', selectedImage);
+        
+        // Add ingredients and instructions as JSON strings
+        formDataToSend.append('ingredients', JSON.stringify(filteredIngredients));
+        formDataToSend.append('instructions', JSON.stringify(filteredInstructions));
 
-      const response = await RecipeService.editRecipe(parseInt(id), recipeData);
+        const response = await RecipeService.editRecipeWithFormData(parseInt(id), formDataToSend);
 
-      if (response.success && response.data) {
-        toast.success("Recipe updated successfully!");
-        navigate('/profile');
+        if (response.success && response.data) {
+          toast.success("Recipe updated successfully!");
+          navigate('/profile');
+        } else {
+          toast.error(response.message || "Failed to update recipe");
+        }
       } else {
-        toast.error(response.message || "Failed to update recipe");
+        // Use JSON format when no new image is selected
+        const recipeData: Partial<CreateRecipeRequest> = {
+          name: formData.name.trim(),
+          categories: formData.categories,
+          dietary_type: formData.dietary_type,
+          youtube_url: formData.youtube_url.trim() || undefined,
+          cook_time: formData.cook_time,
+          servings: formData.servings,
+          difficulty: formData.difficulty,
+          cuisine: formData.cuisine || "Other",
+          calories: typeof formData.calories === 'number' ? formData.calories : parseInt(formData.calories) || 0,
+          tags: formData.tags,
+          ingredients: filteredIngredients,
+          instructions: filteredInstructions
+        };
+
+        const response = await RecipeService.editRecipe(parseInt(id), recipeData);
+
+        if (response.success && response.data) {
+          toast.success("Recipe updated successfully!");
+          navigate('/profile');
+        } else {
+          toast.error(response.message || "Failed to update recipe");
+        }
       }
     } catch (error) {
       console.error('Error updating recipe:', error);
@@ -446,6 +481,7 @@ const EditRecipePage = () => {
           <div className="space-y-2">
             <Label className="text-foreground font-medium">Recipe Image</Label>
             <EnhancedImageUpload
+              key={imagePreview || 'no-image'} // Force re-render when image changes
               onImageSelect={(file, preview) => {
                 setTempImageFile(file);
                 setShowImageCropper(true);
