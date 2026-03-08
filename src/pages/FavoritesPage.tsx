@@ -1,6 +1,7 @@
 import { Heart, Loader2, Search, ChefHat, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BottomNavigation from "@/components/BottomNavigation";
+import MobileHeader from "@/components/MobileHeader";
 import RecipeCard from "@/components/RecipeCard";
 import { Link } from "react-router-dom";
 import InfoIconButton from "../components/ui/InfoIconButton";
@@ -46,7 +47,10 @@ const FavoritesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24 lg:pb-20" style={{ position: "relative" }}>
+    <div className="min-h-screen bg-background pb-24 lg:pb-20 pt-14 lg:pt-0" style={{ position: "relative" }}>
+      {/* Mobile Sticky Header */}
+      <MobileHeader />
+      
       <header className="bg-card shadow-card border-b border-border">
         <div className="px-4 py-4">
           {/* Logo and Info Button Row */}

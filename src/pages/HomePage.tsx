@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Link, useNavigate } from "react-router-dom";
 import BottomNavigation from "@/components/BottomNavigation";
+import MobileHeader from "@/components/MobileHeader";
 import RecipeCard from "@/components/RecipeCard";
 import RandomRecipeModal from "@/components/RandomRecipeModal";
 import { useState, useEffect, useRef } from "react";
@@ -223,12 +224,14 @@ const HomePage = () => {
 
   return (
     <div
-      className="min-h-screen bg-background pb-24 lg:pb-20"
+      className="min-h-screen bg-background pb-24 lg:pb-20 pt-14 lg:pt-0"
       style={{
         position: "relative",
         WebkitOverflowScrolling: "touch"
       }}
     >
+      {/* Mobile Sticky Header */}
+      <MobileHeader />
 
       <header className="bg-card shadow-card border-b border-border">
         <div className="px-4 py-6">

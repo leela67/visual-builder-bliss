@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import BottomNavigation from "@/components/BottomNavigation";
+import MobileHeader from "@/components/MobileHeader";
 import { useNavigate, useParams } from "react-router-dom";
 import { RecipeService, type CreateRecipeRequest, type Ingredient, type Instruction, type Recipe } from "@/api/recipeService";
 import { RECIPE_CATEGORIES, DIFFICULTY_LEVELS, CUISINE_TYPES, DIETARY_TYPES, type RecipeCategory, type DifficultyLevel, type CuisineType, type DietaryType } from "@/api/config";
@@ -361,17 +362,49 @@ const EditRecipePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20" style={{ position: "relative" }}>
-      <header className="bg-card shadow-card border-b border-border">
+    <div className="min-h-screen bg-background pb-20 pt-14 lg:pt-0" style={{ position: "relative" }}>
+      {/* Unified Mobile Sticky Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-b border-border shadow-sm">
+        <div className="px-4 py-3">
+          {/* Top row: Logo, Title, and Actions */}
+          <div className="flex items-center justify-between gap-3">
+            {/* Left: Logo and Back Button */}
+            <div className="flex items-center gap-3">
+              <img
+                src={beingHomeLogo}
+                alt="Being Home Logo"
+                className="h-10 w-10 object-cover rounded-full"
+                onError={(e) => {
+                  console.error('Logo failed to load from:', beingHomeLogo);
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-2"
+                onClick={() => navigate('/profile')}
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <h1 className="text-lg font-semibold text-foreground">Edit Recipe</h1>
+            </div>
+            
+            {/* Right: Info Button */}
+            <InfoIconButton />
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Header */}
+      <header className="hidden lg:block bg-card shadow-card border-b border-border">
         <div className="px-4 py-4">
-          {/* Logo and Info Button Row */}
           <div className="flex items-center justify-between mb-4">
-            {/* Being Home Logo - Extreme Left */}
-            <img 
+            <img
               src={beingHomeLogo}
-              alt="Being Home Logo" 
+              alt="Being Home Logo"
               className="h-12 sm:h-14 md:h-16 w-12 sm:w-14 md:w-16 object-cover rounded-full"
-              style={{ 
+              style={{
                 transform: 'scale(1.5, 1.5)',
                 transformOrigin: 'left center'
               }}
@@ -380,14 +413,13 @@ const EditRecipePage = () => {
                 e.currentTarget.style.display = 'none';
               }}
             />
-            {/* Info Button - Extreme Right */}
             <InfoIconButton />
           </div>
           
           <div className="flex items-center gap-3">
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               className="p-2"
               onClick={() => navigate('/profile')}
             >

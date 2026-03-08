@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import BottomNavigation from "@/components/BottomNavigation";
+import MobileHeader from "@/components/MobileHeader";
 import { Link, useNavigate } from "react-router-dom";
 import { RecipeService, type CreateRecipeRequest, type Ingredient, type Instruction } from "@/api/recipeService";
 import { RECIPE_CATEGORIES, DIFFICULTY_LEVELS, RECIPE_TAGS, CUISINE_TYPES, DIETARY_TYPES, type RecipeCategory, type DifficultyLevel, type RecipeTag, type CuisineType, type DietaryType } from "@/api/config";
@@ -308,7 +309,10 @@ const CreateRecipePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20" style={{ position: "relative" }}>
+    <div className="min-h-screen bg-background pb-20 pt-14 lg:pt-0" style={{ position: "relative" }}>
+      {/* Mobile Sticky Header */}
+      <MobileHeader />
+      
       <header className="bg-card shadow-card border-b border-border">
         <div className="px-4 py-4">
           {/* Logo and Info Button Row */}

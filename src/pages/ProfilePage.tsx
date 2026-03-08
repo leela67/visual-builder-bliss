@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, User, Phone, Heart, LogOut, Edit, Save, X, Bell, BellDot, Trash2, Eye, EyeOff, ChefHat, Clock, Users, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,7 @@ const AVAILABLE_INTERESTS = [
 
 const ProfilePage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [user, setUser] = useState<UserType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -39,13 +40,21 @@ const ProfilePage = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoadingRecipes, setIsLoadingRecipes] = useState(false);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
-  const [activeTab, setActiveTab] = useState("profile");
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || "profile");
 
   useEffect(() => {
     fetchUserProfile();
     fetchUserRecipes();
     fetchNotifications();
   }, []);
+
+  // Update active tab when URL changes
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   const fetchUserProfile = async () => {
     try {

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import StarRating from "@/components/StarRating";
 import BottomNavigation from "@/components/BottomNavigation";
+import MobileHeader from "@/components/MobileHeader";
 import FavoriteHeartButton from "@/components/ui/FavoriteHeartButton";
 import RatingInput from "@/components/RatingInput";
 import RatingDisplay from "@/components/RatingDisplay";
@@ -164,7 +165,10 @@ const RecipeDetailPage = () => {
 
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-6">
+    <div className="min-h-screen bg-background pb-20 md:pb-6 pt-14 lg:pt-0">
+      {/* Mobile Sticky Header */}
+      <MobileHeader />
+      
       <div className="relative">
         {/* Enhanced image with proper loading states and click to view */}
         <div className="relative w-full">
